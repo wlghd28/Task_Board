@@ -1,0 +1,199 @@
+﻿-- 테이블 순서는 관계를 고려하여 한 번에 실행해도 에러가 발생하지 않게 정렬되었습니다.
+-- USER Table Create SQL
+CREATE TABLE USER
+(
+    `user_id`     VARCHAR(45)    NOT NULL, 
+    `user_pwd`    VARCHAR(45)    NOT NULL, 
+    `user_name`   VARCHAR(45)    NOT NULL, 
+    `user_team`   CHAR(30)       NOT NULL, 
+    `user_level`  INT            NOT NULL, 
+     PRIMARY KEY (user_id)
+);
+
+
+-- REPORT Table Create SQL
+CREATE TABLE REPORT
+(
+    `report_num`       INT              NOT NULL    AUTO_INCREMENT, 
+    `report_userid`    VARCHAR(45)      NOT NULL, 
+    `report_username`  VARCHAR(45)      NOT NULL, 
+    `report_userlevel`  INT      NOT NULL, 
+    `report_userteam`  VARCHAR(45)      NOT NULL, 
+    `report_type`      INT              NOT NULL, 
+    `report_date`      DATETIME             NOT NULL, 
+    `report_text`      VARCHAR(3000)    NULL, 
+     PRIMARY KEY (report_num)
+);
+
+
+-- NOTE Table Create SQL
+CREATE TABLE NOTE
+(
+    `note_num`          INT              NOT NULL    AUTO_INCREMENT, 
+    `note_date`         DATETIME             NOT NULL, 
+    `note_userid`       VARCHAR(45)      NOT NULL, 
+    `note_username`     VARCHAR(45)      NOT NULL, 
+    `note_text`         VARCHAR(1000)    NULL, 
+    `note_imagepath1`   VARCHAR(500)     NULL, 
+    `note_imagepath2`   VARCHAR(500)     NULL, 
+    `note_imagepath3`   VARCHAR(500)     NULL, 
+    `note_imagepath4`   VARCHAR(500)     NULL, 
+    `note_imagepath5`   VARCHAR(500)     NULL, 
+    `note_imagepath6`   VARCHAR(500)     NULL, 
+    `note_imagepath7`   VARCHAR(500)     NULL, 
+    `note_imagepath8`   VARCHAR(500)     NULL, 
+    `note_imagepath9`   VARCHAR(500)     NULL, 
+    `note_imagepath10`  VARCHAR(500)     NULL, 
+    `note_imagetext1`   VARCHAR(1000)    NULL, 
+    `note_imagetext2`   VARCHAR(1000)    NULL, 
+    `note_imagetext3`   VARCHAR(1000)    NULL, 
+    `note_imagetext4`   VARCHAR(1000)    NULL, 
+    `note_imagetext5`   VARCHAR(1000)    NULL, 
+    `note_imagetext6`   VARCHAR(1000)    NULL, 
+    `note_imagetext7`   VARCHAR(1000)    NULL, 
+    `note_imagetext8`   VARCHAR(1000)    NULL, 
+    `note_imagetext9`   VARCHAR(1000)    NULL, 
+    `note_imagetext10`  VARCHAR(1000)    NULL, 
+     PRIMARY KEY (note_num)
+);
+
+-- NOTICE_BOARD Table Create SQL
+CREATE TABLE NOTICE_BOARD
+(
+    `notice_num`                              INT              NOT NULL    AUTO_INCREMENT, 
+    `notice_userid`                           VARCHAR(45)      NOT NULL, 
+    `notice_username`                         VARCHAR(45)      NOT NULL, 
+    `notice_userlevel`                        INT              NOT NULL, 
+    `notice_type`                             VARCHAR(45)      NOT NULL, 
+    `notice_title`                            VARCHAR(500)      NOT NULL, 
+    `notice_date`                             DATETIME             NOT NULL, 
+    `notice_reviewcount`                      INT              NOT NULL, 
+    `notice_commentcount`                      INT              NOT NULL, 
+    `notice_content`                          VARCHAR(1000)    NOT NULL, 
+    `notice_filepath1`                        VARCHAR(500)     NULL, 
+    `notice_filepath2`                        VARCHAR(500)     NULL, 
+    `notice_filepath3`                        VARCHAR(500)     NULL, 
+    `notice_filepath4`                        VARCHAR(500)     NULL, 
+    `notice_filepath5`                        VARCHAR(500)     NULL, 
+    `notice_filepath6`                        VARCHAR(500)     NULL, 
+    `notice_filepath7`                        VARCHAR(500)     NULL, 
+    `notice_filepath8`                        VARCHAR(500)     NULL, 
+    `notice_filepath9`                        VARCHAR(500)     NULL, 
+    `notice_filepath10`                       VARCHAR(500)     NULL, 
+    `notice_orgfilename1`                     VARCHAR(500)     NULL, 
+    `notice_orgfilename2`  		VARCHAR(500)     NULL, 
+    `notice_orgfilename3`                     VARCHAR(500)     NULL, 
+    `notice_orgfilename4`                     VARCHAR(500)     NULL, 
+    `notice_orgfilename5`                     VARCHAR(500)     NULL, 
+    `notice_orgfilename6`                     VARCHAR(500)     NULL, 
+    `notice_orgfilename7`                     VARCHAR(500)     NULL, 
+    `notice_orgfilename8`                     VARCHAR(500)     NULL, 
+    `notice_orgfilename9`                     VARCHAR(500)     NULL, 
+    `notice_orgfilename10`                    VARCHAR(500)     NULL, 
+     PRIMARY KEY (notice_num)
+);
+
+
+-- NOTICE_BOARD_COMMENT Table Create SQL
+CREATE TABLE NOTICE_BOARD_COMMENT
+(
+    `comment_num`        INT             NOT NULL    AUTO_INCREMENT, 
+    `notice_num`         INT             NOT NULL, 
+    `comment_userid`     VARCHAR(45)     NOT NULL, 
+    `comment_username`   VARCHAR(45)     NOT NULL, 
+    `comment_userlevel`  INT             NOT NULL, 
+    `comment_date`       DATETIME            NOT NULL, 
+    `comment_text`       VARCHAR(500)    NOT NULL, 
+     PRIMARY KEY (comment_num)
+);
+
+ALTER TABLE NOTICE_BOARD_COMMENT
+    ADD CONSTRAINT FK_NOTICE_BOARD_COMMENT_notice_num_NOTICE_BOARD_notice_num FOREIGN KEY (notice_num)
+        REFERENCES NOTICE_BOARD (notice_num) ON DELETE CASCADE ON UPDATE RESTRICT;
+
+
+
+-- NOTICE_BOARD_REPLY Table Create SQL
+CREATE TABLE NOTICE_BOARD_REPLY
+(
+    `reply_num`        INT             NOT NULL    AUTO_INCREMENT, 
+    `comment_num`      INT             NOT NULL, 
+    `reply_userid`     VARCHAR(45)     NOT NULL, 
+    `reply_username`   VARCHAR(45)     NOT NULL, 
+    `reply_userlevel`  INT             NOT NULL, 
+    `reply_date`       DATETIME            NOT NULL, 
+    `reply_text`       VARCHAR(500)    NOT NULL, 
+     PRIMARY KEY (reply_num)
+);
+
+ALTER TABLE NOTICE_BOARD_REPLY
+    ADD CONSTRAINT FK_NOTICE_BOARD_REPLY_comment_num_NOTICE_BOARD_COMMENT_comment_n FOREIGN KEY (comment_num)
+        REFERENCES NOTICE_BOARD_COMMENT (comment_num) ON DELETE CASCADE ON UPDATE RESTRICT;
+
+
+
+-- NOTICE_BOARD_NOTIFICATION Table Create SQL
+CREATE TABLE NOTICE_BOARD_NOTIFICATION
+(
+    `notification_num`     INT            NOT NULL    AUTO_INCREMENT, 
+    `notification_userid`  VARCHAR(45)    NOT NULL, 
+    `notification_alarm`   INT            NOT NULL, 
+     PRIMARY KEY (notification_num)
+);
+
+
+-- MESSAGE Table Create SQL
+CREATE TABLE MESSAGE
+(
+    `message_num`            INT              NOT NULL    AUTO_INCREMENT, 
+    `message_userid`         VARCHAR(45)      NOT NULL, 
+    `message_username`       VARCHAR(45)      NOT NULL, 
+    `message_title`          VARCHAR(500)      NOT NULL, 
+    `message_date`           DATETIME         NOT NULL, 
+    `message_check`          INT              NOT NULL, 
+    `message_content`        VARCHAR(1000)    NOT NULL, 
+    `message_filepath1`      VARCHAR(500)     NULL, 
+    `message_filepath2`      VARCHAR(500)     NULL, 
+    `message_filepath3`      VARCHAR(500)     NULL, 
+    `message_filepath4`      VARCHAR(500)     NULL, 
+    `message_filepath5`      VARCHAR(500)     NULL, 
+    `message_filepath6`      VARCHAR(500)     NULL, 
+    `message_filepath7`      VARCHAR(500)     NULL, 
+    `message_filepath8`      VARCHAR(500)     NULL, 
+    `message_filepath9`      VARCHAR(500)     NULL, 
+    `message_filepath10`     VARCHAR(500)     NULL, 
+    `message_orgfilename1`   VARCHAR(500)     NULL, 
+    `message_orgfilename2`   VARCHAR(500)     NULL, 
+    `message_orgfilename3`   VARCHAR(500)     NULL, 
+    `message_orgfilename4`   VARCHAR(500)     NULL, 
+    `message_orgfilename5`   VARCHAR(500)     NULL, 
+    `message_orgfilename6`   VARCHAR(500)     NULL, 
+    `message_orgfilename7`   VARCHAR(500)     NULL, 
+    `message_orgfilename8`   VARCHAR(500)     NULL, 
+    `message_orgfilename9`   VARCHAR(500)     NULL, 
+    `message_orgfilename10`  VARCHAR(500)     NULL, 
+     PRIMARY KEY (message_num)
+);
+
+
+-- MESSAGE_RECEIVER Table Create SQL
+CREATE TABLE MESSAGE_RECEIVER
+(
+    `receiver_num`         INT            NOT NULL    AUTO_INCREMENT, 
+    `message_num`          INT            NOT NULL, 
+    `receiver_senderid`    VARCHAR(45)    NOT NULL, 
+    `receiver_sendername`  VARCHAR(45)    NOT NULL, 
+    `receiver_userid`      VARCHAR(45)    NOT NULL, 
+    `receiver_username`    VARCHAR(45)    NOT NULL, 
+    `receiver_check`    INT    NOT NULL, 
+     PRIMARY KEY (receiver_num)
+);
+
+ALTER TABLE MESSAGE_RECEIVER
+    ADD CONSTRAINT FK_MESSAGE_RECEIVER_message_num_MESSAGE_message_num FOREIGN KEY (message_num)
+        REFERENCES MESSAGE (message_num) ON DELETE CASCADE ON UPDATE RESTRICT;
+
+
+
+
+

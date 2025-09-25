@@ -1,0 +1,19 @@
+* 개발 기간 : 2022.05.04 ~ 진행중
+* 개발 프레임 워크 : Node js, CSS, ejs, HTML
+* Database : Mysql
+* 서버 구조 : MVC 패턴 구조
+* Database 명 : Task_Board
+* Database 설계 Tool : AqueryTool (온라인 웹사이트)
+
+1. 관리자 (직접 DB에 넣어서 사용할 것)
+   - 아이디 : admin
+   - 비밀번호 : admin
+
+2. Task_Board 주소 포트번호 : 8000
+
+
+* 서버 구동 방법
+1) cmd 창에서 npm install -g forever를 명령하여 모듈 설치한다.
+2) 서버 시작 : forever start server.js
+3) 프로세스 확인 : forever list
+4) 서버 종료 : forever stop server.js
