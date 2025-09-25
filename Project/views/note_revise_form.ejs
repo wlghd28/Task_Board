@@ -1,0 +1,360 @@
+<div class="container">  <!-- container class 가 페이지의 컨텐츠영역을 지정 -->
+    <div class="jumbotron" style="margin:auto">
+    <div class="bm-login-form" style='margin-left:auto; margin-right:auto; border:1px'>
+        <div class="starter-template">
+        <h4><%=date %></h4> <hr>
+        </div>
+    
+        <form id=join name=join action="/note/revise?_method=PUT" method=post enctype="multipart/form-data" onsubmit="return check();">
+            <div id="contents" name="contents">
+                <input type="hidden" id="upload" name="upload">
+                <% var numberID = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]; %>
+                <% var curTagIndex  = -1; %>
+    
+                <% if(Note) { %>
+                    <% var imgsrc = [Note.note_imagepath1, Note.note_imagepath2, Note.note_imagepath3, Note.note_imagepath4, Note.note_imagepath5, Note.note_imagepath6, Note.note_imagepath7, Note.note_imagepath8, Note.note_imagepath9, Note.note_imagepath10]; %>
+                    <% var imgtext = [Note.note_imagetext1, Note.note_imagetext2, Note.note_imagetext3, Note.note_imagetext4, Note.note_imagetext5, Note.note_imagetext6, Note.note_imagetext7, Note.note_imagetext8, Note.note_imagetext9, Note.note_imagetext10]; %>
+                    <% for(var i = 0; i < imgsrc.length; i++) { %>
+                        <% if(imgsrc[i] != null || imgtext[i] != null) { %>  
+                            <% curTagIndex = i; %>               
+                            <a style="color:white;" id=<%="a" + curTagIndex %> onclick="jQuery('#' + <%=curTagIndex %>).click()" class="btn btn-primary">파일선택</a>  
+                            <br id=<%="br" +curTagIndex%>>               
+                            <input style="display:none;" type="file" id=<%=curTagIndex %> name="imagefiles"> <br id=<%="br" +curTagIndex%>>
+                            <input type="hidden" id=<%="imagepath" + curTagIndex %> name="imagepath" value=<%=imgsrc[i] %>>
+                            <input type="hidden" id=<%="imagecheck" + curTagIndex %> name="imagecheck" value="">
+                            <div style="width:100%;" id=<%="imgtext" + curTagIndex %>>
+                                <img class="preview_image" id=<%="preview-image" + curTagIndex %> name="preview-image" src=<%=src_url + imgsrc[i] %>>
+                                <span class="img_span" id=<%="span" +curTagIndex%>></span>
+                                <textarea class="img_text" rows="5" id=<%="imgtext" + curTagIndex %> name="imagetext"><%=imgtext[i] %></textarea>
+                            </div>
+                            <hr id=<%="hr" + curTagIndex %>>
+                        <% } %>
+                    <% } %>
+                <% } %>
+    
+            </div>
+    
+            <input type="button" id="addfile" name="addfile" value="이미지추가" onclick="AddFile(<%=curTagIndex %>)">
+            <input type="button" id="deletefile" name="deletefile" value="이미지제거" onclick="DeleteFile(<%=curTagIndex %>)">
+            <br><hr>
+            <% if (Note) { %>
+                <textarea id="text" name="text" rows="10" style="width:100%"><%=Note.note_text %></textarea>
+            <% } else { %>
+                <textarea id="text" name="text" rows="10" style="width:100%"></textarea>
+            <% } %>
+
+            <input type="hidden" id="date" name="date" value=<%=date%>>
+            <button style="float:right" type="submit" id="submit" class="btn btn-primary">수정</button>
+        </form>
+    </div>
+    </div>
+    </div>
+    
+     <script>
+        var arrInputId = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+        var _curTagIndex = 0;
+        var _check = 0;
+    
+        function readImage(input) {
+            // 인풋 태그에 파일이 있는 경우
+            if(input.files && input.files[0]) 
+            {
+    
+                // 이미지 파일인지 검사 (생략)
+    
+    
+    
+                // 이미지 태그 생성
+                if(!document.getElementById('preview-image' + input.id))
+                {
+                    var img = document.createElement("img");
+                    var sName = 'preview-image';
+                    var sId = 'preview-image' + input.id;
+    
+                    //img.style.width="45%";
+                    img.setAttribute("class", "preview_image");
+                    img.setAttribute("name", sName);
+                    img.setAttribute("id", sId);
+                    document.getElementById("imgtext" + input.id).prepend(img);
+                }
+    
+                // FileReader 인스턴스 생성
+                const reader = new FileReader()
+                // 이미지가 로드가 된 경우
+                reader.onload = e => {
+                    const previewImage = document.getElementById("preview-image" + input.id);
+                    previewImage.src = e.target.result;
+                }
+                // reader가 이미지 읽도록 하기
+                reader.readAsDataURL(input.files[0]);
+    
+                //alert(typeof(input.files[0]));
+                document.getElementById('imagecheck' + input.id).value = "ok";
+    
+    
+            }
+            else 
+            {
+                // 이미지 태그 삭제
+                //$('#preview-image' + input.id).remove();
+                // 원래 이미지로 돌아간다.
+                document.getElementById("preview-image" + input.id).src =  document.getElementById("imagepath" + input.id).value;
+    
+                // 이미지가 바뀌었는지 판단하는 체크 데이터 원상복귀
+                document.getElementById('imagecheck' + input.id).value = "";
+            }
+        }   
+    
+    
+        // 파일 업로드 버튼에 대한 이벤트 함수 추가
+        for(var i = 0; i <= parseInt("<%=curTagIndex%>"); i++)
+        {
+            document.getElementById(arrInputId[i]).addEventListener("change", e => {
+                readImage(e.target);
+            });
+        }
+    
+    
+        // textarea 추가
+        function AddImageText(id)
+        {
+            var imgtext = document.createElement("textarea");
+            var sName = 'imagetext';
+            var sId = 'imagetext' + id;
+    
+            //imgtext.style.width="45%";
+            //imgtext.style.display="inline-block";
+            imgtext.setAttribute("class", "img_text");
+            imgtext.setAttribute("rows", 5);
+            imgtext.setAttribute("name", sName);
+            imgtext.setAttribute("id", sId);
+            document.getElementById("imgtext" + id).appendChild(imgtext);
+    
+            // 이미지와 설명 textarea 사이의 공백 태그 추가
+            var span, sName_span, sId_span;
+            span = document.createElement("span");
+            sName_span = "span";
+            sId_span = "span" + _curTagIndex;
+    
+            //span.style.width="5%";
+            //span.style.display="inline-block";
+            span.setAttribute("class", "img_span");
+            span.setAttribute("name", sName_span);
+            span.setAttribute("id", sId_span);
+            document.getElementById("imgtext" + id).prepend(span);
+        }
+     
+        // textarea 제거
+        function DeleteImageText(id)
+        {
+            var sId = 'imagetext' + id;
+             $('#'+ sId).remove();
+        }
+    
+    
+        // 파일추가 버튼 이벤트 함수
+        function AddFile(curTagIndex)
+        {
+            if(_check == 0)
+            {
+                _check = 1;
+                _curTagIndex = curTagIndex;
+            }
+    
+            if(_curTagIndex < 9)
+            {
+    
+                _curTagIndex++;
+    
+                var a, sName_a, sId_a;
+                var br, sName_br, sId_br;
+                var file, sName_file, sId_file;
+                var imagepath, sName_imagepath, sId_imagepath;
+                var imagecheck, sName_imagecheck, sId_imagecheck;
+                var div, sName_div, sId_div;
+                var hr, sName_hr, sId_hr;
+    
+                // 파일 업로드 버튼 대체 a 태그 생성
+                a = document.createElement("a");
+                sName_a = "a";
+                sId_a = "a" + _curTagIndex;
+    
+                a.setAttribute("style", "color:white");
+                a.setAttribute("name", sName_a);
+                a.setAttribute("id", sId_a);
+                a.setAttribute("class", "btn btn-primary");
+                a.setAttribute("onclick", "$('#' + " + _curTagIndex + ").click()");
+                a.innerHTML = "파일선택";
+                document.getElementById("contents").appendChild(a);
+    
+                // br 태그 생성
+                br = document.createElement("br");
+                sId_br = "br" + _curTagIndex;
+                br.setAttribute("id", sId_br);
+                document.getElementById("contents").appendChild(br);
+    
+                // 파일 업로드 태그 생성
+                file = document.createElement("INPUT");
+                sName_file = "imagefiles";
+                sId_file = _curTagIndex;
+    
+                file.style.display="none";
+                file.setAttribute("type", "file");
+                file.setAttribute("name", sName_file);
+                file.setAttribute("id", sId_file);
+                document.getElementById("contents").appendChild(file);
+    
+                // 이미지 경로가 들어가있는 히든 태그 생성
+                imagepath = document.createElement("INPUT");
+                sName_imagepath = "imagepath";
+                sId_imagepath = "imagepath" + _curTagIndex;
+    
+                imagepath.setAttribute("type", "hidden");
+                imagepath.setAttribute("name", sName_imagepath);
+                imagepath.setAttribute("id", sId_imagepath);
+                document.getElementById("contents").appendChild(imagepath);
+    
+    
+                // 파일이 바뀌었는지 판단하는 데이터 태그 생성
+                imagecheck = document.createElement("INPUT");
+                sName_imagecheck = "imagecheck";
+                sId_imagecheck = "imagecheck" + _curTagIndex;
+    
+                imagecheck.setAttribute("type", "hidden");
+                imagecheck.setAttribute("name", sName_imagecheck);
+                imagecheck.setAttribute("id", sId_imagecheck);
+                imagecheck.setAttribute("value", "");
+                document.getElementById("contents").appendChild(imagecheck);
+    
+                // br 태그 생성
+                br = document.createElement("br");
+                sId_br = "br" + _curTagIndex;
+                br.setAttribute("id", sId_br);
+                document.getElementById("contents").appendChild(br);
+    
+                // div 태그 생성
+                div = document.createElement("div");
+                sName_div = "imgtext";
+                sId_div = "imgtext" + _curTagIndex;
+    
+                div.style.width="100%";
+                div.setAttribute("name", sName_div);
+                div.setAttribute("id", sId_div);
+                document.getElementById("contents").appendChild(div);
+    
+    
+                // 파일 업로드 버튼에 대한 이벤트 추가
+                document.getElementById(_curTagIndex).addEventListener("change", e => {
+                    readImage(e.target);     
+                });
+    
+    
+                // 이미지를 설명해줄 textarea 추가
+                AddImageText(_curTagIndex);
+    
+                // hr 태그 생성
+                hr = document.createElement("hr");
+                sName_hr = "hr";
+                sId_hr = "hr" + _curTagIndex;
+    
+                hr.setAttribute("name", sName_hr);
+                hr.setAttribute("id", sId_hr);
+                document.getElementById("contents").appendChild(hr);
+    
+                
+            }
+            else{
+                alert("파일은 10개까지 등록 가능합니다.");
+            }
+        }
+    
+    
+        // 파일제거 버튼 이벤트 함수
+        function DeleteFile(curTagIndex)
+        {
+            if(_check == 0)
+            {
+                _check = 1;
+                _curTagIndex = curTagIndex;
+            }
+    
+            if(_curTagIndex >= 0)
+            {
+                // 파일 업로드 선택 버튼 a 태그 삭제
+                $('#a' + _curTagIndex).remove();
+    
+                // br 태그 삭제
+                $('#br' + _curTagIndex).remove();
+    
+                // 이미지 태그 삭제
+                $('#preview-image' + _curTagIndex).remove();
+    
+                // 이미지 설명해줄 textarea 제거
+                DeleteImageText(_curTagIndex);
+    
+                // 파일 업로드 태그 삭제
+                $('#' + _curTagIndex).remove();
+    
+                // 이미지 경로가 들어있는 히든 태그 삭제
+                $('#imagepath' + _curTagIndex).remove();
+    
+                // 파일이 바뀌었는지 판단하는 데이터 태그 삭제
+                $('#imagecheck' + _curTagIndex).remove();
+    
+                // br 태그 삭제
+                $('#br' + _curTagIndex).remove();
+    
+                // div 태그 삭제
+                $('#imgtext' + _curTagIndex).remove();
+    
+                // 이미지 설명해줄 textarea 제거
+                 DeleteImageText(_curTagIndex);
+    
+                // hr 태그 제거
+                $('#hr' + _curTagIndex).remove();
+    
+                _curTagIndex--;
+    
+            }
+        
+        }
+    
+        // $('#submit').click(function() {
+        //     $('form[name="join"]').serialize();
+        //     $('form[name="join"]').attr('method', 'PUT');
+        //     $('form[name="join"]').attr('action', '/note/revise');          
+        //     $('form[name="join"]').submit();
+        // });
+    
+    
+    
+        // // form 태그 submit 이벤트 발생 >> 크롬에서 작동이 안된다!!!
+        // $(window).on("beforeunload", function () {
+        //     alert("Test");
+        //     return "영상을 50초 이상 시청하지 않아 학습이 완료 되지 않았습니다.\n그래도 종료하시겠습니까?";
+        // });
+    
+    
+
+        function check() {
+            if(confirm("노트 내용을 수정 하시겠습니까?"))
+            {
+                return true;
+            }
+            return false;
+        }
+    
+    
+        // $(window).on("beforeunload", function () {
+        //     var message = "이 페이지에서 나가시겠습니까?\n\n지금까지 작성된 글은 저장되지 않습니다.";
+        //     if (confirm(message)) return true;
+        //     else return false;
+        // });
+
+    
+    </script>
+    
+    
+    <!-- /.container -->
+    
+     <!-- Footer 영역 -->

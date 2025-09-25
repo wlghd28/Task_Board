@@ -1,0 +1,38 @@
+<div class="container">  <!-- container class 가 페이지의 컨텐츠영역을 지정 -->
+    <div class="jumbotron" style="margin:auto">
+    <div class="bm-login-form" style='margin-left:auto; margin-right:auto; border:1px'>
+        <div class="starter-template">
+            <h4 style="text-align:center;"><%=date %></h4>
+        </div>
+        <hr>
+        <%if (Content) { %>
+            <% var imgsrc = new Array(); %>
+            <% var imgtext = new Array(); %>
+            <% imgsrc = [Content.note_imagepath1, Content.note_imagepath2, Content.note_imagepath3, Content.note_imagepath4, Content.note_imagepath5, Content.note_imagepath6, Content.note_imagepath7, Content.note_imagepath8, Content.note_imagepath9, Content.note_imagepath10]; %>
+            <% imgtext = [Content.note_imagetext1, Content.note_imagetext2, Content.note_imagetext3, Content.note_imagetext4, Content.note_imagetext5, Content.note_imagetext6, Content.note_imagetext7, Content.note_imagetext8, Content.note_imagetext9, Content.note_imagetext10]; %>
+            <% for(var i = 0; i < imgsrc.length; i++) { %>
+                <% if(imgsrc[i] != null || imgtext[i] != null) { %>
+                    <div class="form-group">
+                        <% if(imgsrc[i] != null) { %>
+                            <img class="preview_image" name="preview-image" src=<%=src_url + imgsrc[i] %>>
+                        <% } %>
+                        <span class="img_span"></span>
+                        <% if(imgtext[i] != null) { %>
+                            <a class="img_text">
+                                <%- imgtext[i].replace(/\r\n|\r|\n/g, '<br>') %>
+                            </a>
+                        <% } %>
+                    </div>       
+                    <hr>
+                <% } %>
+            <% } %>
+            <div style="white-space:pre-line;" class="form-group">
+                <% if(Content.note_text != null) { %>
+                    <%- Content.note_text.replace(/\r\n|\r|\n/g, '<br>') %>
+                <% } %>
+            </div>
+            <hr>
+        <% } %>
+    </div>
+    </div>
+</div><!-- /.container -->

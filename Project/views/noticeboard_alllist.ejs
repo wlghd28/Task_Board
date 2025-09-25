@@ -1,0 +1,232 @@
+<br>
+
+<section id="search-result-container" class="container">
+    <div class="d-flex justify-content-center mx-auto main-label" style="margin:auto">
+        <div class="row">
+            <div >
+                <h4>게시판</h4>
+            </div>
+        </div>
+    </div>
+
+    <div align-content="right" id="detail_searchoption" class="detail_searchoption">
+        <div style="display:block;float:right">
+            <form action="/noticeboard/search" method="get" id="search" style="display:inline">
+                <select id="condition" name="condition">
+                    <option>제목</option>
+                    <option>글쓴이</option>
+                    <option>내용</option>
+                </select>
+                <input type="text" id="simple_search_text" name="simple_search_text" placeholder="검색할 단어를 입력하세요.">
+                <input type="submit" value="검색">
+            </form>
+        </div>
+    </div>
+    <br>
+    <br>
+    <div style="display:block;float:right">
+        <button type="button" onclick="location.href='<%=src_url%>noticeboard/add'" class="btn btn-primary">글쓰기</button>
+    </div>
+    <br>
+    <strong style="float:left;">* 최신 5000개의 글만 보여집니다.</strong>
+    <br>
+    <% var page_quantity = 30; %>
+    <% var pagenum = parseInt(page); %>
+    <% var today_date = new Date(); %>
+    <% var str_date = ""; %>
+    <% var pageindex = 0; %>
+    <!-- PC 화면에서 보이는 테이블 -->
+    <div class="table_pc table-bordered table-responsive">
+        <table id="inquire-table" style="text-align:center;table-layout:fixed;" width="100%" height="100%">
+            <thead>
+                <tr class="table-warning">
+                    <th width="10%" >No.</th>
+                    <th width="60%" >제목</th>
+                    <th width="10%" >글쓴이</th>
+                    <th width="10%" >작성일</th>
+                    <th width="5%" >조회</th>
+                </tr>         
+            </thead>
+            <tbody>
+                <% if(Notice) { %>
+                    <% pageindex = 0; %>
+                    <% str_date = ""; %>
+                    <% Notice.forEach(function (notice, index) { %>
+                        <%if (notice.notice_type == "공지사항") { %>
+                            <% if (parseInt(pageindex / page_quantity + 1) == pagenum)  { %>
+                                <tr>
+                                    <td><strong>공지</strong></td>
+                                    <td style="text-align: left;">
+                                        <form action='/noticeboard/content' method=get id='<%=index %>'>
+                                            <a href=# onclick="document.getElementById('<%=index %>').submit();" class="table_cell" style="max-width:90%">
+                                                <strong>[<%=notice.notice_type %>] <%=notice.notice_title %></strong>
+                                            </a>
+                                            <strong class="table_cell" style="color:#FF4500">[<%=notice.notice_commentcount %>]</strong>
+                                            <input type='hidden' name='notice_num', value=<%=notice.notice_num %>>
+                                        </form>
+                                    </td>
+                                    <td><%=notice.notice_username %></td>
+                                    <td>
+                                        <% if ((notice.notice_date.getDay() == today_date.getDay()) && (notice.notice_date.getYear() == today_date.getYear())) { %>
+                                            <% str_date = ("0" + (notice.notice_date.getHours())).slice(-2) + ":" + ("0" + (notice.notice_date.getMinutes())).slice(-2);%>
+                                        <% } else { %>
+                                            <% str_date = ("0" + (notice.notice_date.getMonth() + 1)).slice(-2) + "-" + ("0" + (notice.notice_date.getDate())).slice(-2);%>
+                                        <% } %>
+                                        <%=str_date %>
+                                        <!-- <%=notice.notice_date %> -->
+                                    </td>
+                                    <td><%=notice.notice_reviewcount %></td>
+                                </tr>      
+                            <% } %>    
+                            <% pageindex++; %>    
+                        <% } %>
+                    <% }); %>
+                    <% Notice.forEach(function (notice, index) { %>  
+                        <%if (notice.notice_type != "공지사항") { %>
+                            <% if (parseInt(pageindex / page_quantity + 1) == pagenum)  { %>
+                                <tr>
+                                    <td><%=index + 1 %></td>
+                                    <td style="text-align: left;">
+                                        <form action='/noticeboard/content' method=get id='<%=index %>'>
+                                            <a href=# onclick="document.getElementById('<%=index %>').submit();" class="table_cell" style="max-width:90%">
+                                                [<%=notice.notice_type %>] <%=notice.notice_title %>
+                                            </a>
+                                            <strong class="table_cell" style="color:#FF4500">[<%=notice.notice_commentcount %>]</strong>
+                                            <input type='hidden' name='notice_num', value=<%=notice.notice_num %>>
+                                        </form>
+                                    </td>
+                                    <td><%=notice.notice_username %></td>
+                                    <td>
+                                        <% if ((notice.notice_date.getDay() == today_date.getDay()) && (notice.notice_date.getYear() == today_date.getYear())) { %>
+                                            <% str_date = ("0" + (notice.notice_date.getHours())).slice(-2) + ":" + ("0" + (notice.notice_date.getMinutes())).slice(-2);%>
+                                        <% } else { %>
+                                            <% str_date = ("0" + (notice.notice_date.getMonth() + 1)).slice(-2) + "-" + ("0" + (notice.notice_date.getDate())).slice(-2);%>
+                                        <% } %>
+                                        <%=str_date %>
+                                        <!-- <%=notice.notice_date %> -->
+                                    </td>
+                                    <td><%=notice.notice_reviewcount %></td>
+                                </tr>  
+                            <% } %>      
+                            <% pageindex++; %> 
+                        <% } %>
+                    <% }); %>
+                <% } %>      
+            </tbody>
+        </table>
+    </div>
+    <!-- 모바일 화면에서 보이는 테이블 -->
+    <div class="table_mobile table-bordered table-responsive">
+        <table id="inquire-table" style="text-align:center;table-layout:fixed;" width="100%" height="100%">
+            <thead>
+                <tr class="table-warning">                 
+                    <th width="100%" >제목</th>
+                </tr>       
+            </thead>
+            <tbody>    
+                <% if(Notice) { %>
+                    <% pageindex = 0; %>
+                    <% str_date = ""; %>
+                    <% Notice.forEach(function (notice, index) { %>
+                        <%if (notice.notice_type == "공지사항") { %>
+                            <% if (parseInt(pageindex / page_quantity + 1) == pagenum)  { %>
+                                <tr>                               
+                                    <td style="text-align: left;" width="100%">
+                                        <form action='/noticeboard/content' method=get id='<%=index %>'>
+                                            <a href=# onclick="document.getElementById('<%=index %>').submit();" class="table_cell" style="max-width:100%">
+                                                <strong>[<%=notice.notice_type %>] <%=notice.notice_title %></strong>
+                                            </a>
+                                            <input type='hidden' name='notice_num', value=<%=notice.notice_num %>>
+                                        </form>
+                                        <p style="font-size:15px">
+                                            <span><%=notice.notice_username %></span>
+                                            <% if ((notice.notice_date.getDay() == today_date.getDay()) && (notice.notice_date.getYear() == today_date.getYear())) { %>
+                                                <% str_date = ("0" + (notice.notice_date.getHours())).slice(-2) + ":" + ("0" + (notice.notice_date.getMinutes())).slice(-2);%>
+                                            <% } else { %>
+                                                <% str_date = ("0" + (notice.notice_date.getMonth() + 1)).slice(-2) + "-" + ("0" + (notice.notice_date.getDate())).slice(-2);%>
+                                            <% } %>
+                                            <span><%=str_date %></span>                  
+                                            <span>조회:<%=notice.notice_reviewcount %></span>
+                                            <strong style="color:#FF4500">댓글:<%=notice.notice_commentcount %></strong>
+                                        </p>
+                                    </td>
+                                </tr>      
+                            <% } %>    
+                            <% pageindex++; %>    
+                        <% } %>
+                    <% }); %>
+                    <% Notice.forEach(function (notice, index) { %>  
+                        <%if (notice.notice_type != "공지사항") { %>
+                            <% if (parseInt(pageindex / page_quantity + 1) == pagenum)  { %>
+                                <tr>                                
+                                    <td style="text-align: left;">
+                                        <form action='/noticeboard/content' method=get id='<%=index %>'>
+                                            <a href=# onclick="document.getElementById('<%=index %>').submit();" class="table_cell" style="max-width:100%">
+                                                [<%=notice.notice_type %>] <%=notice.notice_title %>
+                                            </a>
+                                            <input type='hidden' name='notice_num', value=<%=notice.notice_num %>>
+                                        </form>
+                                        <p style="font-size:15px">
+                                            <span><%=notice.notice_username %></span>  
+                                            <% if ((notice.notice_date.getDay() == today_date.getDay()) && (notice.notice_date.getYear() == today_date.getYear())) { %>
+                                                <% str_date = ("0" + (notice.notice_date.getHours())).slice(-2) + ":" + ("0" + (notice.notice_date.getMinutes())).slice(-2);%>
+                                            <% } else { %>
+                                                <% str_date = ("0" + (notice.notice_date.getMonth() + 1)).slice(-2) + "-" + ("0" + (notice.notice_date.getDate())).slice(-2);%>
+                                            <% } %>
+                                            <span><%=str_date %></span>
+                                            <span>조회:<%=notice.notice_reviewcount %></span>
+                                            <strong style="color:#FF4500">댓글:<%=notice.notice_commentcount %></strong>
+                                        </p>
+                                    </td>
+                                </tr>  
+                            <% } %>      
+                            <% pageindex++; %> 
+                        <% } %>
+                    <% }); %>
+                <% } %>      
+            </tbody>
+        </table>
+    </div>
+</section>
+<br>        
+<!-- 페이징 기능 -->
+<nav class="text-center" aria-label="...">
+    <ul class="pagination justify-content-center">
+      <% var pageunit = 10; %>
+      <% var pagelength = parseInt((Notice.length - 1)/page_quantity + 1); %>
+      <% var beforepage = pagenum - 1; %>
+      <% if(beforepage < 1) beforepage = 1; %>
+      <% var afterpage = pagenum + 1; %>  
+      <% if(afterpage > pagelength) afterpage = pagelength; %>
+      <li class="page-item">
+        <a class="page-link" href="/noticeboard/list/1" aria-disabled="true"><..</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="/noticeboard/list/<%=beforepage%>" aria-disabled="true"><</a>
+      </li>
+      <% for(var i = parseInt((pagenum - 1) / pageunit) * pageunit; i < parseInt((pagenum - 1) / pageunit) * pageunit + pageunit; i++) { %>
+        <% if(i < pagelength) { %>
+            <% if(pagenum == i + 1){ %>
+            <li class="page-item active" aria-current="page">
+                <a class="page-link" href="/noticeboard/list/<%=i+1%>"><%=i+1%> <span class="sr-only">(current)</span></a>
+            </li>
+            <% }else{ %>
+            <li class="page-item" aria-current="page">
+                <a class="page-link" href="/noticeboard/list/<%=i+1%>"><%=i+1%></a>
+            </li>
+            <% } %>
+        <% } %>
+      <% } %>
+      <li class="page-item">
+        <a class="page-link" href="/noticeboard/list/<%=afterpage%>">></a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="/noticeboard/list/<%=pagelength%>">..></a>
+      </li>
+    </ul>
+</nav>
+
+
+<script>
+    
+</script>

@@ -1,0 +1,19 @@
+<div class="container">  <!-- container class 가 페이지의 컨텐츠영역을 지정 -->
+    <div class="jumbotron" style="margin:auto">
+    <div class="bm-login-form" style='margin-left:auto; margin-right:auto; border:1px'>
+        <div class="starter-template">
+            <h4>보고자 : <%=name %></h4>
+        </div>
+        <hr>
+        <%if (Content) { %>           
+            <div style="white-space:pre-line;" class="form-group">
+                <% if(Content.report_text != null) { %>
+                    <%- Content.report_text.replace(/\r\n|\r|\n/g, '<br>') %>
+                <% } %>
+
+            </div>
+            <hr>
+        <% } %>
+    </div>
+    </div>
+</div><!-- /.container -->

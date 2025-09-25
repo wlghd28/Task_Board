@@ -1,0 +1,243 @@
+
+ /* a {
+  color: #00B7FF;
+}
+
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}  */
+
+:root {
+  --text-color: black;
+  --background-color: #00B7FF;
+  --accent-color: #ffa726;
+}
+body {
+  margin: 0;
+}
+a {
+  text-decoration: none;
+  color: var(--text-color);
+}
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--background-color);
+  padding: 0px 12px;
+  font-family: 'Source Sans Pro', sans-serif;
+}
+.navbar__logo {
+ font-size: 24px;
+ color: var(--text-color);
+}
+.navbar__logo i {
+ color: var(--accent-color);
+}
+.navbar__menu {
+  display: flex;
+  list-style: none;
+  padding-top: 15px;
+}
+.navbar__menu li {
+  padding: 0px 12px;
+}
+.navbar__menu li:hover {
+  background-color: var(--accent-color);
+  border-radius: 4px;
+}
+.navbar__sns {
+  list-style: none;
+  display: flex;
+  padding-left: 0;
+}
+.navbar__sns li {
+  padding: 8px 12px;
+}
+.navbar__toggleBtn {
+  display: none;
+  position: absolute;
+  right: 32px;
+  font-size: 24px;
+  color: var(--accent-color);
+}
+
+.preview_image {
+  width:45%;
+}
+
+.img_span {
+  width:5%; 
+  display:inline-block;
+}
+
+.img_text {
+  width:45%; 
+  display:inline-block;
+}
+
+.table_pc {
+  display:block;
+}
+
+
+.table_mobile {
+  display:none;
+}
+
+.table_cell {
+  display:inline-block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+@media screen and (max-width: 768px) {
+  .navbar {
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 8px 24px;
+  }
+  .navbar__menu {
+          display: none;
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+  }
+  .navbar__menu li {
+          width: 100%;
+          text-align: center;
+  }
+  .navbar__sns {
+          display: none;
+          justify-content: center;
+          width: 100%;
+   }
+  .navbar__toggleBtn {
+           display: block;
+   }
+  .navbar__menu.active,
+  .navbar__sns.active {
+          display: flex;
+  }
+
+  .preview_image {
+    width:100%;   
+  }
+  
+  .img_span {
+    width:0%; 
+  }
+  
+  .img_text {
+    width:100%; 
+  }
+
+  .table_pc {
+    display:none;
+  }
+
+  .table_mobile {
+    display:block;
+  }
+
+}
+
+.detail_searchoption {
+  width:100%;
+}
+
+#toc-content {
+  display: none;
+  position:absolute;
+  float:right;
+  width:50%;
+  background-color: lightgray;
+  height:auto;
+  padding:10px;
+}
+#toc-toggle {
+  cursor: pointer;
+  color: black;
+}
+#toc-toggle:hover {
+  text-decoration: underline;
+}
+
+label { font-family: "Noto Sans KR", \"Noto Sans KR\"; font-size: 16px; font-weight: 400; line-height: 1.5em; }
+.btn { display: inline-block; margin-bottom: 0; font-weight: normal; text-align: center; vertical-align: middle; -ms-touch-action: manipulation; touch-action: manipulation; cursor: pointer; background-image: none; border: 1px solid transparent; white-space: nowrap; padding: 6px 12px; font-size: 14px; line-height: 1.42857143; border-radius: 4px; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+.btn-primary { color: #ffffff; background-color: #337ab7; border-color: #2e6da4; text-decoration: none; }
+#input-file { display:none; }
+
+#container2 { 
+  float:left;
+  width:100%;
+  overflow:hidden;
+  position:relative;
+}
+
+#container1 {
+  float:left;
+  width:100%;
+  position: relative;
+}
+#divnote {
+  float:left;
+  width:50%; /* -4% */
+  position:relative;
+}
+#divreport {
+  float:left;
+  width:50%; /* -4% */
+  position:relative;
+}
+
+
+
+.ck.ck-editor {
+  min-height: 500px;
+}
+
+.ck-editor__editable {
+  min-height: 500px;
+}
+
+.notice_uploadfile{
+  outline: 2px dashed #92b0b3 ;
+  outline-offset:-5px;  
+  text-align: center;
+  transition: all .15s ease-in-out;
+  width: 100%;
+  height: 80px;
+  line-height:  80px;
+  background-color: gray;
+}
+
+
+.insert {
+  padding: 0px 0px;
+  display: block;
+  width: 100%;
+  margin: auto;
+  height: auto;
+  border: 0px solid #dbdbdb;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.insert .file-list {
+  height: auto;
+  overflow: auto;
+  border: 1px solid #989898;
+  padding: 0px;
+}
+.insert .file-list .filebox p {
+  font-size: 14px;
+  margin-top: 3px;
+  display: inline-block;
+}
+.insert .file-list .filebox .delete i{
+  color: #ff5353;
+  margin-left: 5px;
+}

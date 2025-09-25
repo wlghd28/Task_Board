@@ -1,0 +1,367 @@
+<br>
+<div>
+    <section id="search-result-container" class="container">
+        <form id=join name=join method=post enctype="multipart/form-data" action="/noticeboard/revise?_method=PUT" onsubmit="return check()">
+            <h4>글 종류</h4>
+            <select id="type" name="type">
+                <% switch(Content.notice_type)  {
+                    case "일반" : %>
+                        <option>공지사항</option>
+                        <option selected>일반</option>
+                    <% break;        
+                    case "공지사항" : %>
+                        <option selected>공지사항</option>
+                        <option>일반</option>
+                    <% break;
+                    default:break; 
+                } %>
+            </select>
+            <hr>
+            <h4> 제목 </h4>
+            <input type="text" style="width:100%" id="title" name="title" value="<%=Content.notice_title.replace(/(<br>|<br\/>|<br \/>)/g, '\r\n') %>">
+            <hr>
+            <h4>첨부파일</h4>
+            <div class="notice_uploadfile">
+                <p style="color:white;display:inline">첨부파일을 마우스로 끌어 넣으세요.</p>
+                <a style="color:white;" id="uploadfile" onclick="jQuery('#files').click()" class="btn btn-primary">+내 PC</a>
+            </div>
+            <div class="insert">
+                <% var arrOrgFilePath = [ Content.notice_filepath1, Content.notice_filepath2, Content.notice_filepath3, Content.notice_filepath4, Content.notice_filepath5 ]; %>
+                <% var arrOrgFileName = [ Content.notice_orgfilename1, Content.notice_orgfilename2, Content.notice_orgfilename3, Content.notice_orgfilename4, Content.notice_orgfilename5 ]; %>
+                <% var arrIndex = 0; %>
+                <input style="display:none;" type="file" id="files" name="files" onchange="addFile(this);" multiple />
+
+                <div id="file-list" name="file-list" class="file-list">
+                    <input type="hidden" id="filelist" name="filelist">
+                    <% for(var i = 0; i < arrOrgFilePath.length; i++){ %>
+                        <% if (arrOrgFilePath[i]) { %>
+                            <div id=<%="file" + i %> class="filebox">
+                                <p class="name"><%=arrOrgFileName[i] %></p>
+                                <a class="delete" onclick="deleteFile('<%=i%>');"><i class="far fa-minus-square"></i></a>
+                            </div>
+                            <input type="hidden" id=<%="filelist" + i %> name="filelist" value=<%=arrOrgFileName[i] %>>
+                            <% arrIndex++; %>
+                        <% } %>
+                    <% } %>
+                </div>
+
+                <div id="orgfile-list" name="orgfile-list" class="orgfile-list">
+                    <input type="hidden" id="orgfilelist" name="orgfilelist"> 
+                    <% for(var i = 0; i < arrOrgFilePath.length; i++){ %>
+                        <% if (arrOrgFilePath[i]) { %>      
+                             <input type="hidden" id=<%="orgfilelist" + i %> name="orgfilelist" value=<%=arrOrgFileName[i] %>>                     
+                        <% } %>
+                    <% } %>
+                </div>
+                <div id="orgfilepath-list" name="orgfilepath-list" class="orgfilepath-list">
+                    <input type="hidden" id="orgfilepathlist" name="orgfilepathlist">
+                    <% for(var i = 0; i < arrOrgFilePath.length; i++){ %>
+                        <% if (arrOrgFilePath[i]) { %>
+                            <input type="hidden" id=<%="orgfilepathlist" + i %> name="orgfilepathlist" value=<%=arrOrgFilePath[i] %>>                       
+                        <% } %>
+                    <% } %>
+                </div>
+            </div>
+            <hr>
+            <textarea id="ckeditor" name="ckeditor"></textarea>
+            <input type="hidden" id="orgcontent" name="orgcontent">
+            <input type="hidden" id="notice_num" name="notice_num" value=<%=Content.notice_num %>>
+            <button style="float:right;margin:5px" class="btn btn-primary" type="button" onclick="document.getElementById('redirect_ContentUI').submit();">취소</button>
+            <button style="float:right;margin:5px" type="button" id="submit" class="btn btn-primary">수정</button>
+        </form>
+        <form id="redirect_ContentUI" name="redirect_ContentUI" method=get action="/noticeboard/content">
+            <input type="hidden" id="redirect_ContentUI_notice_num" name="notice_num" value="<%=Content.notice_num%>">
+        </form>
+    </section>
+</div>
+<br>
+<script>
+    var theEditor;
+    ClassicEditor
+    // DecoupledEditor
+    .create(document.querySelector('#ckeditor'), 
+    {        
+        // plugins:[],
+        //removePlugins: [ 'exportpdf' ],
+        // toolbar: 
+        // [
+        //     'Heading', 
+        //     'Bold', 
+        //     'Italic', 
+        //     'BulletedList', 
+        //     'NumberedList', 
+        //     'BlockQuote', 
+        //     'InsertTable', 
+        //     'UploadImage',
+        //     'Link',
+        //     'toggleImageCaption',
+        //     'imageTextAlternative',
+        //     'Undo', 
+        //     'Redo'
+        // ],
+        mediaEmbed: {
+            previewsInData:true
+        },
+        language: 'ko',   
+        ckfinder: 
+        {     
+            uploadUrl: '/noticeboard/ckeditor_upload'
+        }
+    })    
+    .then(editor => {
+        theEditor = editor;
+        var tmpStr = "<%=Content.notice_content %>"
+        tmpStr = tmpStr.replaceAll("&lt;", "<");
+        tmpStr = tmpStr.replaceAll("&gt;", ">");
+        tmpStr = tmpStr.replaceAll("&amp;lt;", "<");
+        tmpStr = tmpStr.replaceAll("&amp;gt;", ">");
+        tmpStr = tmpStr.replaceAll("&amp;nbsp;", " ");
+        tmpStr = tmpStr.replaceAll("&amp;amp;", "&");
+        tmpStr = tmpStr.replaceAll("&#34;", "");
+        editor.setData(tmpStr);
+
+        document.getElementById("orgcontent").value = tmpStr;
+
+    })
+    .catch(error => {        
+        alert(error);    
+    });
+
+
+
+
+    $('.notice_uploadfile')
+        .on("dragover", dragOver)
+        .on("dragleave", dragOver)
+        .on("drop", uploadFiles);
+ 
+    function dragOver(e){
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    
+    function uploadFiles(e){
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+
+    function dragOver(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (e.type == "dragover") {
+            $(e.target).css({
+                "background-color": "black",
+                "outline-offset": "-20px"
+            });
+        } else {
+            $(e.target).css({
+                "background-color": "gray",
+                "outline-offset": "-10px"
+            });
+        }
+    }
+
+
+    var maxFileCnt = 5;   // 첨부파일 최대 개수
+    var fileNo = "<%=arrIndex%>";
+    var filesArr = new Array();
+
+    // 이미 이미지가 있었던 경우라면 원래 있던 개수만큼 배열을 채워준다.
+    for(var i = 0; i < fileNo; i++)
+    {
+        filesArr.push("temp");
+    }
+
+    function uploadFiles(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        dragOver(e); //1
+    
+        e.dataTransfer = e.originalEvent.dataTransfer; //2
+        var files = e.target.files || e.dataTransfer.files;
+    
+        var attFileCnt = document.querySelectorAll('.filebox').length;    // 기존 추가된 첨부파일 개수
+        var remainFileCnt = maxFileCnt - attFileCnt;    // 추가로 첨부가능한 개수
+        var curFileCnt = files.length;  // 현재 선택된 첨부파일 개수
+
+        // 첨부파일 개수 확인
+        if (curFileCnt > remainFileCnt) {
+            alert("첨부파일은 최대 " + maxFileCnt + "개 까지 첨부 가능합니다.");
+        } else {
+            for (const file of files) {
+                // 첨부파일 검증
+                if (validation(file)) {
+                    // 파일 배열에 담기
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        filesArr.push(file);
+                    };
+                    reader.readAsDataURL(file);
+
+                    // 목록 추가
+                    let htmlData = '';
+                    htmlData += '<div id="file' + fileNo + '" class="filebox">';
+                    htmlData += '   <p class="name">' + file.name + '</p>';
+                    htmlData += '   <a class="delete" onclick="deleteFile(' + fileNo + ');"><i class="far fa-minus-square"></i></a>';
+                    htmlData += '</div>';
+                    htmlData += '<input type="hidden" id="filelist' + fileNo + '" name="filelist" value="'+ file.name + '">';
+                    $('.file-list').append(htmlData);
+                    fileNo++;
+                } else {
+                    // 초기화
+                    //document.querySelector("input[type=file]").value = "";
+                    //$('.file-list').empty();
+                    continue;
+                }
+            }
+        }
+    }
+
+    /* 첨부파일 추가 */
+    function addFile(obj){
+        var attFileCnt = document.querySelectorAll('.filebox').length;    // 기존 추가된 첨부파일 개수
+        var remainFileCnt = maxFileCnt - attFileCnt;    // 추가로 첨부가능한 개수
+        var curFileCnt = obj.files.length;  // 현재 선택된 첨부파일 개수
+
+        // 첨부파일 개수 확인
+        if (curFileCnt > remainFileCnt) {
+            alert("첨부파일은 최대 " + maxFileCnt + "개 까지 첨부 가능합니다.");
+        } else {
+            for (const file of obj.files) {
+                // 첨부파일 검증
+                if (validation(file)) {
+                    // 파일 배열에 담기
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        filesArr.push(file);
+                    };
+                    reader.readAsDataURL(file);
+
+                    // 목록 추가
+                    let htmlData = '';
+                    htmlData += '<div id="file' + fileNo + '" class="filebox">';
+                    htmlData += '   <p class="name">' + file.name + '</p>';
+                    htmlData += '   <a class="delete" onclick="deleteFile(' + fileNo + ');"><i class="far fa-minus-square"></i></a>';
+                    htmlData += '</div>';
+                    htmlData += '<input type="hidden" id="filelist' + fileNo + '" name="filelist" value="'+ file.name + '">';
+                    $('.file-list').append(htmlData);
+                    fileNo++;
+                } else {
+                    continue;
+                }
+            }
+        }
+    }
+
+    /* 첨부파일 검증 */
+    function validation(obj){
+        const fileTypes = ['application/pdf', 'image/gif', 'image/jpeg', 'image/png', 'image/bmp', 'image/tif', 'application/haansofthwp', 'application/x-hwp'];
+        if (obj.name.length > 100) {
+            alert("파일명이 100자 이상인 파일은 업로드 할 수 없습니다.");
+            return false;
+        } else if (obj.size > (100 * 1024 * 1024)) {
+            alert("최대 파일 용량인 100MB를 초과한 파일은 업로드 할 수 없습니다.");
+            return false;
+        } else if (obj.name.lastIndexOf('.') == -1) {
+            alert("확장자가 없는 파일은 업로드 할 수 없습니다.");
+            return false;
+        } else if (!fileTypes.includes(obj.type)) {
+            alert("첨부가 불가능한 파일이 포함됐습니다.");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /* 첨부파일 삭제 */
+    function deleteFile(num) {
+        document.querySelector("#file" + num).remove();
+        document.querySelector("#filelist" + num).remove();
+        filesArr[num].is_delete = true;
+    }
+
+    /* 폼 전송 */
+    var revise_noticeboard_check = 0;   // 0이면 수정 안 된 상태, 1이면 수정 된 상태
+    $("#submit").click(
+        function submitForm(event) {
+            if(!check()) return;
+            //event.preventDefault();
+            // 서버에 데이터를 넘기기 전에  기존에 들어있는 file 데이터 초기화
+            document.querySelector("input[type=file]").value = "";
+            // 폼데이터 담기
+            var form = document.querySelector("form");
+            var formData = new FormData(form);
+            for (var i = 0; i < filesArr.length; i++) {
+                // 삭제되지 않은 파일만 폼데이터에 담기
+                if (!filesArr[i].is_delete) {
+                    formData.append("files", filesArr[i]);
+                }
+            }
+
+            // ckeditor 내용 삽입
+            formData.append("content",theEditor.getData());
+
+            $.ajax({
+                method: 'PUT',
+                url: '/noticeboard/revise',
+                dataType: 'json',
+                data: formData,
+                processData: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+                contentType: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+                async: true,
+                timeout: 30000,
+                cache: false,
+                headers: {'cache-control': 'no-cache', 'pragma': 'no-cache'},
+                success: function () {
+                    //alert("파일업로드 성공");
+                    revise_noticeboard_check = 1;
+                    document.getElementById("redirect_ContentUI").submit();
+                },
+                error: function (xhr, desc, err) {
+                    alert('에러가 발생 하였습니다.');
+                    return;
+                }
+            })
+        }
+    );
+
+
+
+
+    function check() {
+        var title = document.getElementById('title').value;
+        var content = theEditor.getData();
+
+        if(!title)
+        {
+            alert("제목이 입력되지 않았습니다.");
+            return false;
+        }
+
+        if(!content)
+        {
+            alert("내용이 입력되지 않았습니다.");
+            return false;
+        }
+
+
+        if(!confirm("게시글을 수정하시겠습니까?"))
+            return false;
+
+        return true;
+    }
+    
+    $(window).on("beforeunload", function () {
+        if( revise_noticeboard_check == 0)
+        {
+            var message = "이 페이지에서 나가시겠습니까?\n\n지금까지 작성된 글은 저장되지 않습니다.";
+            if (confirm(message)) return true;
+            else return false;
+        }
+    });
+
+
+
+
+</script>

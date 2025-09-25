@@ -1,0 +1,65 @@
+<div style="width:100%">  <!-- container class 가 페이지의 컨텐츠영역을 지정 -->
+<div id="container2">
+<div id="container1">
+    <div id="divnote" class="jumbotron" style="margin:auto; width:50%; float:left" >
+        <% if(Note) { %>
+            <% var arrAttr = new Array(); %>
+            <% Note.forEach(function (note, index) { %>   
+                <% arrAttr = [note.note_imagetext1, note.note_imagetext2, note.note_imagetext3, note.note_imagetext4, note.note_imagetext5, note.note_imagetext6, note.note_imagetext7, note.note_imagetext8, note.note_imagetext9, note.note_imagetext10, note.note_text]; %>
+                <h3><%=note["DATE_FORMAT(note_date,'%Y-%m-%d')"]%></h3>
+                <hr>
+                <% for(var i = 0; i <  arrAttr.length; i++) { %>
+                    <% if(arrAttr[i] != null) { %>
+                        <%- arrAttr[i].replace(/\r\n|\r|\n/g, '<br>') %>
+                        <br>
+                    <% } %>
+                <% } %>
+                <hr>
+            <% }); %>
+        <% } %>
+    </div>
+    <div id="divreport" class="jumbotron" style="margin:auto; width:50%; float:right" >
+        <h3>보고서</h3>
+        <hr>
+        <form id=join name=join method=post action="/report/week" onsubmit="return validate()">
+            <input type="hidden" id="upload" name="upload">
+            <% if (Report) { %>
+                <textarea id="report" name="report" style="width:100%"><%=Report.report_text %></textarea>
+            <% } else { %>
+                <textarea id="report" name="report" style="width:100%"></textarea>
+            <% } %>
+            <button style="float:right" type="submit" id="submit" class="btn btn-primary">제출</button>
+        </form>
+    </div>
+</div>
+</div>
+</div><!-- /.container -->
+<script>
+    window.onload = function(){
+        const divnote = document.getElementById("divnote");
+        const divreport = document.getElementById("divreport");
+        const report = document.getElementById("report");
+
+        if(divnote.offsetHeight > 500)
+        {
+            divreport.style.height = divnote.offsetHeight + "px";
+            report.style.height = divnote.offsetHeight - 200 + "px";
+        }
+        else
+        {
+            divreport.style.height = 500 + "px";
+            report.style.height = 300 + "px";
+            divnote.style.height = 500 + "px";
+        }
+    }
+
+    function validate() {
+        if(confirm("제출하시겠습니까?")) 
+        {
+            alert("주간보고서가 제출되었습니다.");
+            return true;
+        }
+        return false;
+    }
+
+</script>

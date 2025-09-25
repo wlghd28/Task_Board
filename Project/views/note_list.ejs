@@ -1,0 +1,164 @@
+<br>
+<section id="search-result-container" class="container">
+    <div class="d-flex justify-content-center mx-auto main-label" style="margin:auto">
+        <div class="row">
+            <div >
+                <h4>노트 목록</h4>
+            </div>
+        </div>
+    </div>
+
+    <div align-content="right" id="detail_searchoption" class="detail_searchoption">
+        <div style="display:block;float:right">
+            <form action="/note/simplesearch" method="get" id="simple_search" style="display:inline">
+                <input type="text" id="simple_search_text" name="simple_search_text" placeholder="검색할 단어를 입력하세요.">
+                <input type="submit" value="검색">
+            </form>
+            <button id="toc-toggle" onclick="openCloseToc()" style="margin-left:5px">상세 &#9660;</button>
+        </div>
+        <div id="toc-content">        
+            <form action="/note/detailsearch" method="get" id="detail_search">
+                포함된 단어<br>
+                <input type="text" id="detail_search_text" name="detail_search_text" placeholder="검색할 단어를 입력하세요." style="width:100%"><hr>
+                날짜<br>
+                <input type="date" id="detail_search_startdate" name="detail_search_startdate" style="width:40%"> 
+                ~ 
+                <input type="date" id="detail_search_enddate" name="detail_search_enddate" style="width:40%">
+                <hr>
+                <input type="submit" value="검색" style="float:right">
+            </form>
+        </div>
+    </div>
+    <br>
+    <strong style="float:left;">* 최신 100개의 노트만 보여집니다.</strong>
+    <br>
+    <strong style="float:left;">* 오래된 노트는 검색으로 조회 가능합니다.</strong>
+    <br>
+
+    <div class="table table-bordered table-responsive">
+        <table id="inquire-table" style="text-align: center;" width="100%" height="100%">
+            <tbody class="table">
+                <tr class="table-warning">
+                    <th width="10%" >No.</th>
+                    <th width="90%" >Date</th>
+                </tr>
+                <% if(List) { %>
+                    <% var arrText = new Array(); %>
+                    <% List.forEach(function (note, index) { %>    
+                        <% arrText[index] = [note.note_imagetext1, note.note_imagetext2, note.note_imagetext3, note.note_imagetext4, note.note_imagetext5, note.note_imagetext6, note.note_imagetext7, note.note_imagetext8, note.note_imagetext9, note.note_imagetext10, note.note_text]; %>
+                        <% for(var i = 0; i < arrText[index].length; i++) { %>
+                            <% if (arrText[index][i] == null) { %>
+                                <% arrText[index][i] = ""; %>
+                            <% } %>
+                        <% } %>
+                        
+                        <tr>
+                            <td><%=index + 1 %></td>
+                            <td>
+                                <form action='/note/list/content' method=get id='<%=index %>'>
+                                    <a 
+                                        href=# 
+                                        onclick="document.getElementById('<%=index %>').submit();" 
+                                        onmousemove="setPreviewBox('<%=index %>');" 
+                                        onmouseover="showPreview(<%=JSON.stringify(note) %>);" 
+                                        onmouseout="hidePreview();"
+                                    >
+                                        <%=note["DATE_FORMAT(note_date,'%Y-%m-%d')"] %>
+                                    </a>
+                                    <input type='hidden' name='date', value=<%=note["DATE_FORMAT(note_date,'%Y-%m-%d')"] %>>
+                                </form>
+                            </td>
+                        </tr>              
+                    <% }); %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<div id="preview" style="overflow:hidden; background-color:white; visibility:hidden; position:absolute; left:0px; top:0px; width:30%; height:auto; z-index:1; border-width:1px; border-style:solid;"></div>           
+
+<script>
+    // 페이지 로드할 때 실행
+    window.onload = function(){
+        GetPosition_toc_content ();
+    }
+
+    // 화면 크기 변경 감지
+    window.addEventListener('resize', function(){
+        GetPosition_toc_content ();
+    });
+
+    // 화면 회전감지
+    window.addEventListener('orientationchange', function(){
+        GetPosition_toc_content ();
+    });
+
+
+    function setPreviewBox(id){
+        preview.style.left = event.x + 30 + 'px';
+        preview.style.top = window.pageYOffset + document.getElementById(id).getBoundingClientRect().top + 'px';
+    }
+
+    function showPreview(Note){
+        var _Note = 
+        [
+            Note.note_imagetext1, 
+            Note.note_imagetext2, 
+            Note.note_imagetext3,
+            Note.note_imagetext4,
+            Note.note_imagetext5,
+            Note.note_imagetext6,
+            Note.note_imagetext7,
+            Note.note_imagetext8,
+            Note.note_imagetext9,
+            Note.note_imagetext10,
+            Note.note_text
+        ];
+
+        //alert(JSON.stringify(_Note));
+
+        var text = "";
+
+        for(var i = 0; i < _Note.length; i++)
+        {
+            if(_Note[i] != null) text += (_Note[i] + '<br>');
+        }
+
+        //text = JSON.stringify(text);
+        preview.innerHTML = text.replace(/\r\n|\r|\n/g, '<br>');
+        preview.style.visibility = 'visible';
+    }
+
+    function hidePreview(){
+        preview.innerHTML='';
+        preview.style.visibility='hidden';
+    }
+
+
+    function openCloseToc() {
+        if(document.getElementById('toc-content').style.display === 'block') {
+            document.getElementById('toc-content').style.display = 'none';
+        } else {
+            document.getElementById('toc-content').style.display = 'block';
+        }
+
+        GetPosition_toc_content ();
+    } 
+
+
+    function GetPosition_toc_content () {
+        const toc_content = document.getElementById("toc-content");
+        const toc_toggle = document.getElementById("toc-toggle");
+        const detail_searchoption = document.getElementById("detail_searchoption");
+
+        const absoluteTop_toc_toggle = window.pageYOffset + toc_toggle.getBoundingClientRect().top;
+        const absoluteRight_toc_toggle = window.pageXOffset + toc_toggle.getBoundingClientRect().right;
+
+        toc_content.style.top = absoluteTop_toc_toggle + toc_toggle.offsetHeight + "px";     
+        toc_content.style.right = absoluteRight_toc_toggle - detail_searchoption.offsetWidth + "px";
+    }
+
+    
+
+</script>

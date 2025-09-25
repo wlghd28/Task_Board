@@ -1,0 +1,99 @@
+<br>
+
+<section id="search-result-container" class="container">
+    <div class="d-flex justify-content-center mx-auto main-label" style="margin:auto">
+        <div class="row">
+            <div >
+                <h4>받은 메시지 함</h4>
+            </div>
+        </div>
+    </div>
+
+    <div align-content="right" id="detail_searchoption" class="detail_searchoption">
+        <div style="display:block;float:right">
+            <form action="/message/searchreceived" method="get" id="search" style="display:inline">
+                <select id="condition" name="condition">
+                    <option>제목</option>
+                    <option>보낸사람</option>
+                    <option>내용</option>
+                </select>
+                <input type="text" id="simple_search_text" name="simple_search_text" placeholder="검색할 단어를 입력하세요.">
+                <input type="submit" value="검색">
+            </form>
+        </div>
+    </div>
+    <br>
+    <br>
+    <!-- PC 화면에서 보이는 테이블 -->
+    <div class="table_pc table-bordered table-responsive">
+        <table id="inquire-table" style="text-align:center;table-layout:fixed;" width="100%" height="100%">
+            <thead>
+                <tr class="table-warning">
+                    <th width="10%">From.</th>
+                    <th>제목</th>
+                    <th width="20%" >날짜</th>
+                </tr>         
+            </thead>
+            <tbody>
+                <% if(Message) { %>
+                    <% Message.forEach(function (message, index) { %>                                 
+                        <tr>
+                            <td><a class="table_cell" style="max-width:100%"><%=message.message_username%></a></td>
+                            <td style="text-align: left;">
+                                <form action='/message/content' method=get id='<%=index %>'>
+                                    <a href=# onclick="document.getElementById('<%=index %>').submit();" class="table_cell" style="max-width:100%">
+                                        <% if(message.receiver_check == 0) { %>
+                                            <strong><%=message.message_title %></strong>
+                                        <% } else { %>
+                                            <%=message.message_title %>
+                                        <% } %>   
+                                    </a>
+                                    <input type='hidden' name='message_num', value=<%=message.message_num %>>
+                                </form>
+                            </td>
+                            <td><%=message["DATE_FORMAT(message_date, '%Y.%m.%d %H:%i')"] %></td>
+                        </tr>      
+                    <% }); %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+    <!-- 모바일 화면에서 보이는 테이블 -->
+    <div class="table_mobile table-bordered table-responsive">
+        <table id="inquire-table" style="text-align:center;table-layout:fixed;" width="100%" height="100%">
+            <thead>
+                <tr class="table-warning">                 
+                    <th width="100%" >제목</th>
+                </tr>       
+            </thead>
+            <tbody>
+                <% if(Message) { %>
+                    <% Message.forEach(function (message, index) { %>                               
+                        <tr>                               
+                            <td style="text-align: left;" width="100%">
+                                <form action='/message/content' method=get id='<%=index %>'>
+                                    <a href=# onclick="document.getElementById('<%=index %>').submit();" class="table_cell" style="max-width:100%">
+                                        <% if(message.receiver_check == 0) { %>
+                                            <strong><%=message.message_title %></strong>
+                                        <% } else { %>
+                                            <%=message.message_title %>
+                                        <% } %>   
+                                    </a>
+                                    <input type='hidden' name='message_num', value=<%=message.message_num %>>
+                                </form>
+                                <p style="font-size:15px">
+                                    <span class="table_cell" style="max-width:50%">From. <%=message.message_username%></span>                                    
+                                    <span class="table_cell" style="margin-left:20px"><%=message["DATE_FORMAT(message_date, '%Y.%m.%d %H:%i')"] %></span>                  
+                                </p>
+                            </td>
+                        </tr>      
+                    <% }); %>     
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script>
+    
+</script>

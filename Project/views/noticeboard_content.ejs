@@ -1,0 +1,592 @@
+<div class="container">  <!-- container class 가 페이지의 컨텐츠영역을 지정 -->
+    <div class="jumbotron" style="margin:auto">
+    <div class="bm-login-form" style='margin-left:auto; margin-right:auto; border:1px'>
+        <% if(Content) { %>
+            <% if (Content.notice_userid == userid) { %>
+                <form id=delete name=delete method=post action="/noticeboard/delete?_method=DELETE" onsubmit="return deletecheck()">
+                    <input type="hidden" name="notice_num" value=<%=Content.notice_num %>>
+                    <button style="float:right;margin:5px" type="submit" id="delete_submit" class="btn btn-primary">삭제</button>
+                </form>
+                <form id=revise name=revise method=get action="/noticeboard/revise">
+                    <input type="hidden" name="notice_num" value=<%=Content.notice_num %>>
+                    <button style="float:right;margin:5px" type="submit" id="revise_submit" class="btn btn-primary">수정</button>
+                </form>
+                <br>
+            <% } %>
+            <br>
+            <div style="text-align:center;font-size:20px">
+                <%=Content["DATE_FORMAT(notice_date, '%Y-%m-%d %H:%i')"] %>
+            </div>
+            <div>
+                <h7><%=Content.notice_type %></h7>
+                <hr>
+                <p>
+                    글쓴이 : <%=Content.notice_username %>
+                </p>
+            </div>
+            <hr>
+            <h5>[ <%=Content.notice_title %> ]</h5>
+            <hr>
+            <h7><strong>첨부파일</strong></h7><br><br>
+            <div>
+                <form id=download1 name=download method=get action="/noticeboard/content/download">
+                    <input type="hidden" id="filepath" name="filepath" value="<%=Content.notice_filepath1 %>">
+                    <input type="hidden" id="filename" name="filename" value="<%=Content.notice_orgfilename1 %>">
+                    <a href="#" onclick="return document.getElementById('download1').submit()"><%=Content.notice_orgfilename1 %></a>
+                </form>
+                <form id=download2 name=download method=get action="/noticeboard/content/download">
+                    <input type="hidden" id="filepath" name="filepath" value="<%=Content.notice_filepath2 %>">
+                    <input type="hidden" id="filename" name="filename" value="<%=Content.notice_orgfilename2 %>">
+                    <a href="#" onclick="return document.getElementById('download2').submit()"><%=Content.notice_orgfilename2 %></a>
+                </form>
+                <form id=download3 name=download method=get action="/noticeboard/content/download">
+                    <input type="hidden" id="filepath" name="filepath" value="<%=Content.notice_filepath3 %>">
+                    <input type="hidden" id="filename" name="filename" value="<%=Content.notice_orgfilename3 %>">
+                    <a href="#" onclick="return document.getElementById('download3').submit()"><%=Content.notice_orgfilename3 %></a>
+                </form>
+                <form id=download4 name=download method=get action="/noticeboard/content/download">
+                    <input type="hidden" id="filepath" name="filepath" value="<%=Content.notice_filepath4 %>">
+                    <input type="hidden" id="filename" name="filename" value="<%=Content.notice_orgfilename4 %>">
+                    <a href="#" onclick="return document.getElementById('download4').submit()"><%=Content.notice_orgfilename4 %></a>
+                </form>
+                <form id=download5 name=download method=get action="/noticeboard/content/download">
+                    <input type="hidden" id="filepath" name="filepath" value="<%=Content.notice_filepath5 %>">
+                    <input type="hidden" id="filename" name="filename" value="<%=Content.notice_orgfilename5 %>">
+                    <a href="#" onclick="return document.getElementById('download5').submit()"><%=Content.notice_orgfilename5 %></a>
+                </form>
+            </div>
+            <hr>
+            <div id="content" class="form-group" style="min-height:300px;"></div>
+            <hr>
+        <% } %>
+    </div>
+    <div>
+        <p>Comment <% if(Content) { (Content.notice_commentcount) } %></p>
+        <form id="addcomment" name="addcomment" method=post action="/noticeboard/comment/add" enctype="multipart/form-data">
+            <textarea id="comment" name="comment" rows="3" style="width:100%;"></textarea>
+            <button type="button" id="submitcomment" name="submitcomment" style="float:right;">등록</button>
+        </form>
+        <form id="redirect_ContentUI" name="redirect_ContentUI" method=get action="/noticeboard/content">
+            <input type="hidden" id="notice_num" name="notice_num" value="<%=Content.notice_num%>">
+        </form>
+    </div>
+    <br>
+    <hr>
+    <div id="commentarea" name="commentarea"> 
+        <% if (Comment) { %>
+            <% Comment.forEach(function (comment, index) { %>   
+                <div style="display:inline-block;">[ <%=comment.comment_userid%> |  <%=comment.comment_username%> | <span style="font-size: 10px;"><%=comment["DATE_FORMAT(comment_date, '%m-%d %H:%i')"]%></span> ]</div>
+                <% if(comment.comment_userid == userid) { %>
+                    <a style="font-size:10px;" href="javascript:void(0);" id="<%='revisecomment' + comment.comment_num %>" name="revisecomment" onclick="ReviseCommentBox('<%=comment.comment_num%>')">수정</a>
+                    |
+                    <a style="font-size:10px;" href="javascript:void(0);" id="<%='deletecomment' + comment.comment_num %>" name="deletecomment" onclick="DeleteComment('<%=comment.comment_num%>')">삭제</a>
+                <% } %>
+                <br>
+                <div id="<%='text_comment' + comment.comment_num %>" name="text_comment"><%-comment.comment_text.replace(/\r\n|\r|\n/g, '<br>') %></div>
+                <div id="<%='div_revisecomment_textarea' + comment.comment_num %>" name="div_revisecomment_textarea"></div>
+                <a style="font-size:10px;" id="<%='addreply_textarea' + comment.comment_num %>" name="addreply_textarea" href="javascript:void(0);" onclick="AddReplyBox('<%=comment.comment_num%>')">답글</a>
+                <div id="<%='div_addreply_textarea' + comment.comment_num %>" name="div_addreply_textarea"></div>
+                <br id="<%='br_addreply' + comment.comment_num %>" name="br_addreply" style="display:none">
+                <% if (Reply) { %>
+                    <div style="margin-left: 50px" id="replyarea" name="replyarea">
+                        <% Reply.forEach(function(reply, index) { %>
+                            <% if (comment.comment_num == reply.comment_num) { %>
+                                <div style="display:inline-block">↳ [ <%=reply.reply_userid%> |  <%=reply.reply_username%> |  <span style="font-size: 10px;"><%=reply["DATE_FORMAT(reply_date, '%m-%d %H:%i')"]%></span> ]</div>
+                                <% if(reply.reply_userid == userid) { %>  
+                                    <a style="font-size:10px;" href="javascript:void(0);" id="<%='revisereply' + reply.reply_num %>" name="revisereply" onclick="ReviseReplyBox('<%=reply.reply_num%>')">수정</a>       
+                                    |        
+                                    <a style="font-size:10px;" href="javascript:void(0);" id="<%='deletereply' + reply.reply_num %>" name="deletereply" onclick="DeleteReply('<%=reply.reply_num%>')">삭제</a>
+                                <% } %>
+                                <br>
+                                <div id="<%='text_reply' + reply.reply_num %>" name="text_reply" style="margin-left:15px"><%-reply.reply_text.replace(/\r\n|\r|\n/g, '<br>') %></div>
+                                <div id="<%='div_revisereply_textarea' + reply.reply_num %>" name="div_revisereply_textarea"></div>
+                                <br>
+                            <% } %>
+                        <% }); %>
+                    </div>
+                <% } %>
+                <br>
+            <% }); %>       
+        <% } %>
+    </div>
+    </div>
+</div><!-- /.container -->
+
+<script>
+    // 페이지 로드할 때 실행
+    window.onload = function(){ 
+        var tmpimg = new Image();
+        var figuretag = document.getElementsByClassName("image");
+        var imgtag = $(".image").find('img');
+        if(imgtag)
+        {
+            for(var i = 0; i < imgtag.length; i++)
+            {
+                imgtag[i].style.width = figuretag[i].style.width;
+            }
+        }
+    }
+
+    var content = document.getElementById("content");
+    var tmpStr = "<%=Content.notice_content %>"
+    tmpStr = tmpStr.replaceAll("&lt;", "<");
+    tmpStr = tmpStr.replaceAll("&gt;", ">");
+    tmpStr = tmpStr.replaceAll("&amp;lt;", "<");
+    tmpStr = tmpStr.replaceAll("&amp;gt;", ">");
+    tmpStr = tmpStr.replaceAll("&amp;nbsp;", " ");
+    tmpStr = tmpStr.replaceAll("&amp;amp;", "&");
+    tmpStr = tmpStr.replaceAll("&#34;", "");
+    content.innerHTML = tmpStr;
+
+    function deletecheck() {
+        if(confirm("게시글을 삭제하시겠습니까?"))
+            return true;
+
+        return false;
+    }
+
+
+
+    /* 폼 전송 */
+    $("#submitcomment").click(
+        function submitForm(event) {    
+            // 댓글 내용이 있는지 검증
+            if(!document.getElementById("comment").value)
+            {
+                alert("댓글내용이 입력되지 않았습니다.")
+                return;
+            }
+
+
+
+            //event.preventDefault();
+            // 폼데이터 담기
+            var form = document.getElementById("addcomment");
+            var formData = new FormData(form);
+            formData.append("notice_num", "<%=Content.notice_num%>");
+
+            $.ajax({
+                method: 'POST',
+                url: '/noticeboard/comment/add',
+                dataType: 'json',
+                data: formData,
+                processData: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+                contentType: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+                async: true,
+                timeout: 30000,
+                cache: false,
+                headers: {'cache-control': 'no-cache', 'pragma': 'no-cache'},
+                success: function () {
+                    //alert("파일업로드 성공");
+                   document.getElementById("redirect_ContentUI").submit();
+                   return;
+                },
+                error: function (xhr, desc, err) {
+                    alert('댓글 추가도중 에러가 발생 하였습니다.');
+                    document.getElementById("redirect_ContentUI").submit();
+                    return;
+                }
+            })
+        }
+    );
+    
+
+
+    function AddReplyBox(comment_num)
+    {
+        // 답글 a태그 숨긴다.
+        document.getElementById("addreply_textarea" + comment_num).style.visibility="hidden";
+
+        // div_reply_textarea 태그 안에 textarea 추가
+        var textarea = document.createElement("textarea");
+        var sName_textarea = 'addreply_textbox';
+        var sId_textarea = 'addreply_textbox' + comment_num;
+
+        textarea.style.width="100%";
+        textarea.setAttribute("name", sName_textarea);
+        textarea.setAttribute("id", sId_textarea);
+        textarea.setAttribute("rows", 2);
+        document.getElementById("div_addreply_textarea" + comment_num).append(textarea);
+
+        
+        // 답글 취소 버튼 추가
+        var canclebutton = document.createElement("button");
+        var sName_canclebutton = 'cancle_addreply';
+        var sId_canclebutton = 'cancle_addreply' + comment_num;
+
+        canclebutton.style.fontSize="10px";
+        canclebutton.style.float="right";
+        canclebutton.style.margin="1px";
+        canclebutton.setAttribute("name", sName_canclebutton);
+        canclebutton.setAttribute("id", sId_canclebutton);
+        canclebutton.onclick = function(){  CancleAddReply(comment_num); };
+        canclebutton.appendChild(document.createTextNode("취소"));
+        document.getElementById("div_addreply_textarea" + comment_num).append(canclebutton);
+
+        // 답글 등록 버튼 추가
+        var addbutton = document.createElement("button");
+        var sName_addbutton = 'send_addreply';
+        var sId_addbutton = 'send_addreply' + comment_num;
+
+        addbutton.style.fontSize="10px";
+        addbutton.style.float="right";
+        addbutton.style.margin="1px";
+        addbutton.setAttribute("name", sName_addbutton);
+        addbutton.setAttribute("id", sId_addbutton);
+        addbutton.onclick = function(){ AddReply(comment_num);  };
+        addbutton.appendChild(document.createTextNode("등록"));  
+        document.getElementById("div_addreply_textarea" + comment_num).append(addbutton);
+
+        // br태그 보이기
+        document.getElementById("br_addreply" + comment_num).style.display="block";
+
+    };
+
+
+    // 답글 등록 버튼 눌렀을 때 호출
+    function AddReply(comment_num)
+    {       
+        if(!document.getElementById("addreply_textbox" + comment_num).value)
+        {
+            alert("답글내용이 입력되지 않았습니다.");
+            return;
+        }
+
+
+
+        // 폼데이터 담기
+        var formData = new FormData();
+        formData.append("comment_num", comment_num);
+        formData.append("reply", document.getElementById("addreply_textbox" + comment_num).value);
+        formData.append("notice_num", "<%=Content.notice_num%>");
+        // 폼 전송
+        $.ajax({
+            method: 'POST',
+            url: '/noticeboard/reply/add',
+            dataType: 'json',
+            data: formData,
+            processData: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+            contentType: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+            async: true,
+            timeout: 30000,
+            cache: false,
+            headers: {'cache-control': 'no-cache', 'pragma': 'no-cache'},
+            success: function () {
+                document.getElementById("redirect_ContentUI").submit();
+            return;
+            },
+            error: function (xhr, desc, err) {
+                alert('답글 추가도중 에러가 발생 하였습니다.');
+                document.getElementById("redirect_ContentUI").submit();
+                return;
+            }
+        });
+  
+    }
+
+
+    // 답글 추가 취소 버튼 눌렀을 때 호출
+    function CancleAddReply(comment_num)
+    {
+        // 답글 a태그 보인다.
+        document.getElementById("addreply_textarea" + comment_num).style.visibility="visible";
+
+        // div_addreply_textarea 태그 안의 내용 삭제
+        $("#div_addreply_textarea" + comment_num).empty();
+        document.getElementById("br_addreply" + comment_num).style.display="none";
+    };
+
+
+    // 댓글 수정 눌렀을 때 호출
+    function ReviseCommentBox(comment_num)
+    {
+       
+        // 기존의 div태그 숨김
+        document.getElementById("text_comment" + comment_num).style.display="none";
+
+        // textarea 생성 및 그 안에 원래 있는 내용 넣는다.
+        var textarea = document.createElement("textarea");
+        var sName_textarea = 'revisecomment_textbox';
+        var sId_textarea = 'revisecomment_textbox' + comment_num;
+
+        textarea.style.width="100%";
+        textarea.setAttribute("name", sName_textarea);
+        textarea.setAttribute("id", sId_textarea);
+        textarea.setAttribute("rows", 2);
+        document.getElementById("div_revisecomment_textarea" + comment_num).append(textarea);
+        document.getElementById(sId_textarea).value = document.getElementById("text_comment" + comment_num).innerHTML.replace(/(<br>|<br\/>|<br \/>)/g, '\r\n');
+
+        // 댓글 수정 취소 버튼 생성
+        var canclebutton = document.createElement("button");
+        var sName_canclebutton = 'cancle_revisecomment';
+        var sId_canclebutton = 'cancle_revisecomment' + comment_num;
+        canclebutton.style.fontSize="10px";
+        canclebutton.style.float="right";
+        canclebutton.style.margin="1px";
+        canclebutton.setAttribute("name", sName_canclebutton);
+        canclebutton.setAttribute("id", sId_canclebutton);
+        canclebutton.onclick = function(){  CancleReviseComment(comment_num); };
+        canclebutton.appendChild(document.createTextNode("취소"));
+        document.getElementById("div_revisecomment_textarea" + comment_num).append(canclebutton);
+
+
+        // 댓글 수정 버튼 생성
+        var revisebutton = document.createElement("button");
+        var sName_revisebutton = 'send_revisecomment';
+        var sId_revisebutton = 'send_revisecomment' + comment_num;
+
+        revisebutton.style.fontSize="10px";
+        revisebutton.style.float="right";
+        revisebutton.style.margin="1px";
+        revisebutton.setAttribute("name", sName_revisebutton);
+        revisebutton.setAttribute("id", sId_revisebutton);
+        revisebutton.onclick = function(){ ReviseComment(comment_num);  };
+        revisebutton.appendChild(document.createTextNode("수정"));  
+        document.getElementById("div_revisecomment_textarea" + comment_num).append(revisebutton);
+
+        // 댓글 수정 a태그 비활성화
+        document.getElementById("revisecomment" + comment_num).style.visibility="hidden";
+        
+    };
+
+
+    // 댓글 수정 요청 서버에 보낼 때 호출
+    function ReviseComment(comment_num)
+    {
+
+        if(!document.getElementById("revisecomment_textbox" + comment_num).value)
+        {
+            alert("댓글내용이 입력되지 않았습니다.");
+            return;
+        }
+
+        // 폼데이터 담기
+        var formData = new FormData();
+        formData.append("comment_num", comment_num);
+        formData.append("comment", document.getElementById("revisecomment_textbox" + comment_num).value);
+
+        // 폼 전송
+        $.ajax({
+            method: 'PUT',
+            url: '/noticeboard/comment/revise',
+            dataType: 'json',
+            data: formData,
+            processData: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+            contentType: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+            async: true,
+            timeout: 30000,
+            cache: false,
+            headers: {'cache-control': 'no-cache', 'pragma': 'no-cache'},
+            success: function () {
+                document.getElementById("redirect_ContentUI").submit();
+            return;
+            },
+            error: function (xhr, desc, err) {
+                alert('댓글 수정도중 에러가 발생 하였습니다.');
+                document.getElementById("redirect_ContentUI").submit();
+                return;
+            }
+        });
+    };
+
+
+    // 댓글 수정 취소 버튼 눌렀을 때 호출
+    function CancleReviseComment(comment_num)
+    {
+        // 기존의 div태그 보임
+        document.getElementById("text_comment" + comment_num).style.display="block";
+
+        // div_revisecomment_textarea 태그 안의 내용 삭제
+        $("#div_revisecomment_textarea" + comment_num).empty();
+
+        // 댓글 수정 a태그 활성화
+        document.getElementById("revisecomment" + comment_num).style.visibility="visible";
+    };
+
+
+   
+    // 답글 수정 눌렀을 때 호출
+    function ReviseReplyBox(reply_num)
+    {
+       
+        // 기존의 div태그 숨김
+        document.getElementById("text_reply" + reply_num).style.display="none";
+
+        // textarea 생성 및 그 안에 원래 있는 내용 넣는다.
+        var textarea = document.createElement("textarea");
+        var sName_textarea = 'revisereply_textbox';
+        var sId_textarea = 'revisereply_textbox' + reply_num;
+
+        textarea.style.width="100%";
+        textarea.setAttribute("name", sName_textarea);
+        textarea.setAttribute("id", sId_textarea);
+        textarea.setAttribute("rows", 2);
+        document.getElementById("div_revisereply_textarea" + reply_num).append(textarea);
+        document.getElementById(sId_textarea).value = document.getElementById("text_reply" + reply_num).innerHTML.replace(/(<br>|<br\/>|<br \/>)/g, '\r\n');
+
+        // 댓글 수정 취소 버튼 생성
+        var canclebutton = document.createElement("button");
+        var sName_canclebutton = 'cancle_revisereply';
+        var sId_canclebutton = 'cancle_revisereply' + reply_num;
+        canclebutton.style.fontSize="10px";
+        canclebutton.style.float="right";
+        canclebutton.style.margin="1px";
+        canclebutton.setAttribute("name", sName_canclebutton);
+        canclebutton.setAttribute("id", sId_canclebutton);
+        canclebutton.onclick = function(){  CancleReviseReply(reply_num); };
+        canclebutton.appendChild(document.createTextNode("취소"));
+        document.getElementById("div_revisereply_textarea" + reply_num).append(canclebutton);
+
+
+        // 댓글 수정 버튼 생성
+        var revisebutton = document.createElement("button");
+        var sName_revisebutton = 'send_revisereply';
+        var sId_revisebutton = 'send_revisereply' + reply_num;
+
+        revisebutton.style.fontSize="10px";
+        revisebutton.style.float="right";
+        revisebutton.style.margin="1px";
+        revisebutton.setAttribute("name", sName_revisebutton);
+        revisebutton.setAttribute("id", sId_revisebutton);
+        revisebutton.onclick = function(){ ReviseReply(reply_num);  };
+        revisebutton.appendChild(document.createTextNode("수정"));  
+        document.getElementById("div_revisereply_textarea" + reply_num).append(revisebutton);
+
+        
+        // 답글 수정 a태그 비활성화
+        document.getElementById("revisereply" +reply_num).style.visibility="hidden";
+
+    };
+
+    // 답글 수정 요청 서버에 보낼 때 호출
+    function ReviseReply(reply_num)
+    {
+        if(!document.getElementById("revisereply_textbox" + reply_num).value)
+        {
+            alert("답글내용이 입력되지 않았습니다.");
+            return;
+        }
+
+        // 폼데이터 담기
+        var formData = new FormData();
+        formData.append("reply_num", reply_num);
+        formData.append("reply", document.getElementById("revisereply_textbox" + reply_num).value);
+
+        // 폼 전송
+        $.ajax({
+            method: 'PUT',
+            url: '/noticeboard/reply/revise',
+            dataType: 'json',
+            data: formData,
+            processData: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+            contentType: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+            async: true,
+            timeout: 30000,
+            cache: false,
+            headers: {'cache-control': 'no-cache', 'pragma': 'no-cache'},
+            success: function () {
+                document.getElementById("redirect_ContentUI").submit();
+            return;
+            },
+            error: function (xhr, desc, err) {
+                alert('답글 수정도중 에러가 발생 하였습니다.');
+                document.getElementById("redirect_ContentUI").submit();
+                return;
+            }
+        });
+    };
+
+
+    // 답글 수정 취소 버튼 눌렀을 때 호출
+    function CancleReviseReply(reply_num)
+    {
+        // 기존의 div태그 보임
+        document.getElementById("text_reply" + reply_num).style.display="block";
+
+        // div_revisecomment_textarea 태그 안의 내용 삭제
+        $("#div_revisereply_textarea" + reply_num).empty();
+
+        // 답글 수정 a태그 활성화
+        document.getElementById("revisereply" +reply_num).style.visibility="visible";
+    };
+
+
+    // 댓글 삭제 눌렀을 때 호출
+    function DeleteComment(comment_num)
+    {
+
+        if(!confirm("해당 댓글을 삭제하시겠습니까?"))
+        {
+            return;
+        }
+
+
+        // 폼데이터 담기
+        var formData = new FormData();
+        formData.append("comment_num", comment_num);
+        formData.append("notice_num", "<%=Content.notice_num%>");
+
+        // 폼 전송
+        $.ajax({
+            method: 'DELETE',
+            url: '/noticeboard/comment/delete',
+            dataType: 'json',
+            data: formData,
+            processData: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+            contentType: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+            async: true,
+            timeout: 30000,
+            cache: false,
+            headers: {'cache-control': 'no-cache', 'pragma': 'no-cache'},
+            success: function () {
+                document.getElementById("redirect_ContentUI").submit();
+            return;
+            },
+            error: function (xhr, desc, err) {
+                alert('댓글 삭제도중 에러가 발생 하였습니다.');
+                document.getElementById("redirect_ContentUI").submit();
+                return;
+            }
+        });
+    };
+
+
+
+    // 답글 삭제 눌렀을 때 호출
+    function DeleteReply(reply_num)
+    {
+        if(!confirm("해당 답글을 삭제하시겠습니까?"))
+        {
+            return;
+        }
+
+        // 폼데이터 담기
+        var formData = new FormData();
+        formData.append("reply_num", reply_num);
+        formData.append("notice_num", "<%=Content.notice_num%>");
+
+        // 폼 전송
+        $.ajax({
+            method: 'DELETE',
+            url: '/noticeboard/reply/delete',
+            dataType: 'json',
+            data: formData,
+            processData: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+            contentType: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+            async: true,
+            timeout: 30000,
+            cache: false,
+            headers: {'cache-control': 'no-cache', 'pragma': 'no-cache'},
+            success: function () {
+                document.getElementById("redirect_ContentUI").submit();
+            return;
+            },
+            error: function (xhr, desc, err) {
+                alert('답글 삭제도중 에러가 발생 하였습니다.');
+                document.getElementById("redirect_ContentUI").submit();
+                return;
+            }
+        });
+    };
+
+</script>

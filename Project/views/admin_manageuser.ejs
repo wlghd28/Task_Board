@@ -1,0 +1,97 @@
+<script>
+    function DeleteUser_validate() {
+        if(confirm("유저를 삭제하시겠습니까?")) 
+        {
+            return true;
+        }
+        return false;
+    };
+
+
+    function AlterUserInfo_validate(index) {
+        if(confirm("해당 유저의 정보를 변경하시겠습니까?")) 
+        {
+            document.getElementById("selected_level" + index).setAttribute("value", document.getElementById("level" + index).selectedIndex);    
+            document.getElementById("selected_team" + index).setAttribute("value", document.getElementById("team" + index).value);          
+            return true;
+        }
+
+        return false;
+    }
+</script>
+
+
+<section id="search-result-container" class="container">
+    <div class="d-flex justify-content-center mx-auto main-label" style="margin:auto">
+        <div class="row">
+            <div>
+                <br><h4>유저 목록</h4>
+            </div>
+        </div>
+    </div>
+    <div class="table table-bordered table-responsive">
+        <table id="inquire-table" style="text-align:center;" width="100%" height="100%">
+            <tbody class="table">
+                <tr class="table-warning">
+                    <th width="5%" >No.</th>
+                    <th>계정</th>
+                    <th width="10%" >이름</th>
+                    <th width="10%" >소속팀</th>
+                    <th width="10%" >직급</th>
+                    <th width="10%" >변경</th>
+                    <th width="10%" >삭제</th>
+                </tr>
+                <% if(User) { %>
+                    <% var arrLevel = ["팀원", "팀장", "임원", "사장", "회장"]; %>
+                    <% var arrTeam = ["경영지원", "영업", "스택", "제어", "BOP"]; %>
+                    <% User.forEach(function (user, index) { %>                       
+                        <tr>
+                            <td><%=index + 1 %></td>
+                            <td style="text-align:left;">
+                                <a style="display:block;">ID : <%=user.user_id %></a>
+                                <a style="display:block;">Pwd : <%=user.user_pwd %></a>
+                            </td>
+                            <td><%=user.user_name %></td>
+                            <td>
+                                <select id=<%="team" + index %> name="team">
+                                    <% for(var i = 0; i < arrTeam.length; i++) { %> 
+                                        <% if (user.user_team == arrTeam[i]) { %>
+                                            <option value=<%=arrTeam[i] %> selected><%=arrTeam[i] %></option>
+                                        <% } else { %>                              
+                                            <option value=<%=arrTeam[i] %>><%=arrTeam[i] %></option>
+                                        <% } %>      
+                                    <% } %>
+                                </select>
+                            </td>
+                            <td>
+                                <select id=<%="level" + index %> name="level">
+                                    <% for(var i = 0; i < arrLevel.length; i++) { %> 
+                                        <% if (user.user_level == i) { %>
+                                            <option value=<%=arrLevel[i] %> selected><%=arrLevel[i] %></option>
+                                        <% } else { %>                              
+                                            <option value=<%=arrLevel[i] %>><%=arrLevel[i] %></option>
+                                        <% } %>      
+                                    <% } %>
+                                </select>
+                            </td>
+                            <td>
+                                <form action='/admin/alteruserinfo?_method=PUT' method=post id='<%=index %>' onsubmit="return AlterUserInfo_validate('<%=index%>')">
+                                    <input type='hidden' name='userid' value='<%=user.user_id %>'>
+                                    <input type='hidden' id=<%="selected_level" + index %> name='selected_level' value="">
+                                    <input type='hidden' id=<%="selected_team" + index %> name='selected_team' value="">
+                                    <button style="float:center" type="submit" id="submit" class="btn btn-primary">변경</button>
+                                </form>
+                            </td>
+                            <td>
+                                <form action='/admin/deleteuser?_method=DELETE' method=post id='<%=index %>' onsubmit="return DeleteUser_validate()">
+                                    <input type='hidden' name='userid', value='<%=user.user_id %>'>
+                                    <button style="float:center" type="submit" id="submit" class="btn btn-primary">삭제</button>
+                                </form>
+                            </td>
+                        </tr>              
+                    <% }); %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</section>

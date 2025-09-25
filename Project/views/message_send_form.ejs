@@ -1,0 +1,411 @@
+<br>
+<div>
+    <section id="search-result-container" class="container">
+        <form id=join name=join method=post enctype="multipart/form-data" action="/message/send" onsubmit="return check();">
+            <a style="font-size:20px"> 받는 사람 </a>
+            <!-- <input type="text" style="width:100%" id="receiveuser" name="receiveuser"> -->
+            <i class="far fa-plus-square" id="showuserlist" name="showuserlist" onclick="ShowUserList()"></i>
+            <div id="receiveuserlist" name="receiveuserlist">
+
+            </div>
+            <div id="alluserlist" name="alluserlist" style="display:none;">
+                <hr>
+                <div style="margin-bottom:10px">
+                <strong>list</strong> 
+                <button id="alladdreceiveuser" type="button" style="font-size:10px;margin-left:10px" onclick="AllAddReceiveUser()">전체선택</button> 
+                <button id="alldeletereceiveuser" type="button" style="font-size:10px;" onclick="AllDeleteReceiveUser()">전체해제</button>
+                </div>
+                <% if(User) { %>
+                    <% User.forEach(function (user, index) { %>
+                        <span style="margin:5px;background-color:lightgray;" id="<%='alluser' + index%>">
+                            <a id="<%='alluser_name' + index%>"><%=user.user_name%></a>(<a id="<%='alluser_id' + index%>"><%=user.user_id%></a>)
+                            <i class="far fa-plus-square" id="<%='addreceiveuser' + index%>" name="addreceiveuser" onclick="AddReceiveUser('<%=index%>')"></i>
+                        </span>
+                    <% }); %>
+                <% } %>
+            </div>
+            <hr>
+            <h4> 제목 </h4>
+            <input type="text" style="width:100%" id="title" name="title">
+            <hr>
+            <h4>첨부파일</h4>
+            <div class="notice_uploadfile">
+                <p style="color:white;display:inline">첨부파일을 마우스로 끌어 넣으세요.</p>
+                <a style="color:white;" id="uploadfile" onclick="jQuery('#files').click()" class="btn btn-primary">+내 PC</a>
+            </div>
+            <div class="insert">
+                <input style="display:none;" type="file" id="files" name="files" onchange="addFile(this);" multiple="multiple" />
+                <input type="hidden" id="filelist" name="filelist" value="" />
+                <div id="file-list" name="file-list" class="file-list"></div>
+                <!-- <div id="ckeditor-filelist" name="ckeditor-filelist"></div> -->
+                
+            </div>
+            <hr>
+            <textarea id="ckeditor" name="ckeditor"></textarea>
+            <button style="float:right;margin:5px" type="button" id="submit" class="btn btn-primary">보내기</button>
+        </form>
+    </section>
+</div>
+<br>
+<script>
+    var theEditor;
+    ClassicEditor
+    // DecoupledEditor
+    .create(document.querySelector('#ckeditor'), 
+    {        
+        // plugins:[],
+        //removePlugins: [ 'exportpdf' ],
+        // toolbar: 
+        // [
+        //     'Heading', 
+        //     'Bold', 
+        //     'Italic', 
+        //     'BulletedList', 
+        //     'NumberedList', 
+        //     'BlockQuote', 
+        //     'InsertTable', 
+        //     'UploadImage',
+        //     'Link',
+        //     'toggleImageCaption',
+        //     'imageTextAlternative',
+        //     'Undo', 
+        //     'Redo'
+        // ],
+        mediaEmbed: {
+            previewsInData:true
+        },
+        language: 'ko',    
+        ckfinder:  
+        {     
+            uploadUrl: '/message/ckeditor_upload'
+        }
+           
+    })    
+    .then(editor => {
+        theEditor = editor;
+        // ckeditor 값이 변할 때마다 호출
+        // editor.model.document.on('change:data', function(e) {
+
+        // });
+    })
+    .catch(error => {        
+        alert(error);    
+    });
+
+
+
+
+    $('.notice_uploadfile')
+        .on("dragover", dragOver)
+        .on("dragleave", dragOver)
+        .on("drop", uploadFiles);
+ 
+    function dragOver(e){
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    
+    function uploadFiles(e){
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+
+    function dragOver(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (e.type == "dragover") {
+            $(e.target).css({
+                "background-color": "black",
+                "outline-offset": "-20px"
+            });
+        } else {
+            $(e.target).css({
+                "background-color": "gray",
+                "outline-offset": "-10px"
+            });
+        }
+    }
+
+
+    var maxFileCnt = 5;   // 첨부파일 최대 개수
+    var fileNo = 0;
+    var filesArr = new Array();
+
+    function uploadFiles(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        dragOver(e); //1
+    
+        e.dataTransfer = e.originalEvent.dataTransfer; //2
+        var files = e.target.files || e.dataTransfer.files;
+    
+        var attFileCnt = document.querySelectorAll('.filebox').length;    // 기존 추가된 첨부파일 개수
+        var remainFileCnt = maxFileCnt - attFileCnt;    // 추가로 첨부가능한 개수
+        var curFileCnt = files.length;  // 현재 선택된 첨부파일 개수
+
+        // 첨부파일 개수 확인
+        if (curFileCnt > remainFileCnt) {
+            alert("첨부파일은 최대 " + maxFileCnt + "개 까지 첨부 가능합니다.");
+        } else {
+            for (const file of files) {
+                // 첨부파일 검증
+                if (validation(file)) {
+                    // 파일 배열에 담기
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        filesArr.push(file);
+                    };
+                    reader.readAsDataURL(file);
+
+                    // 목록 추가
+                    let htmlData = '';
+                    htmlData += '<div id="file' + fileNo + '" class="filebox">';
+                    htmlData += '   <p class="name">' + file.name + '</p>';
+                    htmlData += '   <a class="delete" onclick="deleteFile(' + fileNo + ');"><i class="far fa-minus-square"></i></a>';
+                    htmlData += '</div>';
+                    htmlData += '<input type="hidden" id="filelist' + fileNo + '" name="filelist" value="'+ file.name + '">';
+                    $('.file-list').append(htmlData);
+                    fileNo++;
+                } else {
+                    // 초기화
+                    //document.querySelector("input[type=file]").value = "";
+                    //$('.file-list').empty();
+                    continue;
+                }
+            }
+        }
+    }
+
+    /* 첨부파일 추가 */
+    function addFile(obj){
+        var attFileCnt = document.querySelectorAll('.filebox').length;    // 기존 추가된 첨부파일 개수
+        var remainFileCnt = maxFileCnt - attFileCnt;    // 추가로 첨부가능한 개수
+        var curFileCnt = obj.files.length;  // 현재 선택된 첨부파일 개수
+        var check = 0;
+
+        // 첨부파일 개수 확인
+        if (curFileCnt > remainFileCnt) {
+            alert("첨부파일은 최대 " + maxFileCnt + "개 까지 첨부 가능합니다.");
+        } else {
+            for (const file of obj.files) {
+                // 첨부파일 검증
+                if (validation(file)) {
+                    // 파일 배열에 담기
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        filesArr.push(file);
+                    };
+                    reader.readAsDataURL(file);
+
+                    // 목록 추가
+                    let htmlData = '';
+                    htmlData += '<div id="file' + fileNo + '" class="filebox">';
+                    htmlData += '   <p class="name">' + file.name + '</p>';
+                    htmlData += '   <a class="delete" onclick="deleteFile(' + fileNo + ');"><i class="far fa-minus-square"></i></a>';
+                    htmlData += '</div>';
+                    htmlData += '<input type="hidden" id="filelist' + fileNo + '" name="filelist" value="'+ file.name + '">';
+                    $('.file-list').append(htmlData);
+                    fileNo++;
+                } else {
+                    continue;
+                }
+            }
+        }
+    }
+
+    /* 첨부파일 검증 */
+    function validation(obj){
+        const fileTypes = ['application/pdf', 'image/gif', 'image/jpeg', 'image/png', 'image/bmp', 'image/tif', 'application/haansofthwp', 'application/x-hwp'];
+        if (obj.name.length > 100) {
+            alert("파일명이 100자 이상인 파일은 업로드 할 수 없습니다.");
+            return false;
+        } else if (obj.size > (100 * 1024 * 1024)) {
+            alert("최대 파일 용량인 100MB를 초과한 파일은 업로드 할 수 없습니다.");
+            return false;
+        } else if (obj.name.lastIndexOf('.') == -1) {
+            alert("확장자가 없는 파일은 업로드 할 수 없습니다.");
+            return false;
+        } else if (!fileTypes.includes(obj.type)) {
+            alert("첨부가 불가능한 파일이 포함됐습니다.");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /* 첨부파일 삭제 */
+    function deleteFile(num) {
+        document.querySelector("#file" + num).remove();
+        document.querySelector("#filelist" + num).remove();
+        filesArr[num].is_delete = true;
+    }
+
+    /* 폼 전송 */
+    var messagesend_check = 0;  // 0이면 메시지 보내기 전, 1이면 메시지 보낸 후
+    $("#submit").click(
+        function submitForm(event) {
+            if(!check()) return;
+            //event.preventDefault();
+            // 서버에 데이터를 넘기기 전에  기존에 들어있는 file 데이터 초기화
+            document.querySelector("input[type=file]").value = "";
+            // 폼데이터 담기
+            var form = document.querySelector("form");
+            var formData = new FormData(form);
+            for (var i = 0; i < filesArr.length; i++) {
+                // 삭제되지 않은 파일만 폼데이터에 담기
+                if (!filesArr[i].is_delete) {
+                    formData.append("files", filesArr[i]);
+                }
+            }
+
+            // ckeditor 내용 삽입
+            formData.append("content",theEditor.getData());
+
+
+            $.ajax({
+                method: 'POST',
+                url: '/message/send',
+                dataType: 'json',
+                data: formData,
+                processData: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+                contentType: false,     // 이녀석 false로 해줘야 multipart 타입 가능하다.
+                async: true,
+                timeout: 30000,
+                cache: false,
+                headers: {'cache-control': 'no-cache', 'pragma': 'no-cache'},
+                success: function () {
+                    alert("메시지를 성공적으로 보냈습니다.");
+                    messagesend_check = 1;
+                    window.location.href = '/message/sentlist/1';
+                },
+                error: function (xhr, desc, err) {
+                    alert('메시지를 보내는 도중 에러가 발생 하였습니다.');
+                    return;
+                }
+            })
+        }
+    );
+    
+
+    var show_userlist = 0;   // 0이면 숨김상태(default), 1이면 보임상태
+    function ShowUserList() {
+        if(show_userlist  == 0)
+        {
+            document.getElementById("alluserlist").style.display="block"
+            show_userlist  = 1;
+        }
+        else if (show_userlist  == 1)
+        {
+            document.getElementById("alluserlist").style.display="none"
+            show_userlist  = 0;
+        }
+    };
+
+
+    function AddReceiveUser(index) {
+        // alluserlist 태그에서 선택된 유저 숨김
+        document.getElementById("alluser" + index).style.display = "none";
+
+        // receiveuserlist 태그에 선택된 유저 추가
+        let htmlData = '';
+        htmlData += '<span style="margin:5px;background-color:lightgray;" id="receiveuser' + index + '" name="receiveuser">';
+        htmlData += '   <a id="receiveuser_name' + index + '" name="receiveuser_name">' + document.getElementById("alluser_name" + index).innerText + '</a>';
+        htmlData += '   (<a id="receiveuser_id' + index + '" name="receiveuser_id">' + document.getElementById("alluser_id" + index).innerText + '</a>)';
+        htmlData += '   <i class="far fa-minus-square" id="deletereceiveuser' + index + '"' +'onclick="DeleteReceiveUser(' + index + ')">' + '</i>';
+        htmlData += '   <input type="hidden" id="receiveusername' + index + '" name="receiveusername" value="' + document.getElementById("alluser_name" + index).innerText + '">';
+        htmlData += '   <input type="hidden" id="receiveuserid' + index + '" name="receiveuserid" value="' + document.getElementById("alluser_id" + index).innerText + '">';
+        htmlData += '</span>';
+        $('#receiveuserlist').append(htmlData);
+    };
+
+
+    function DeleteReceiveUser(index) {
+        // receiveuserlist 태그에 선택된 유저 삭제
+        $('#receiveuser' + index).remove();
+
+        // alluserlist 태그에서 선택된 유저 보임
+        document.getElementById("alluser" + index).style.display = "inline";
+
+    };
+
+    // 전체 유저 선택
+    function AllAddReceiveUser() {
+        let htmlData = '';
+        for(var i = 0; i < "<%=User.length%>"; i++)
+        {
+            // alluserlist 태그에서 모든 유저 숨김
+            document.getElementById("alluser" + i).style.display = "none";
+
+            // receiveuserlist 태그에 추가되지 않은 모든 유저 추가
+            if(!document.getElementById("receiveuser" + i))
+            {
+                htmlData = '';
+                htmlData += '<span style="margin:5px;background-color:lightgray;" id="receiveuser' + i + '" name="receiveuser">';
+                htmlData += '   <a id="receiveuser_name' + i + '" name="receiveuser_name">' + document.getElementById("alluser_name" + i).innerText + '</a>';
+                htmlData += '   (<a id="receiveuser_id' + i + '" name="receiveuser_id">' + document.getElementById("alluser_id" + i).innerText + '</a>)';
+                htmlData += '   <i class="far fa-minus-square" id="deletereceiveuser' + i + '"' +'onclick="DeleteReceiveUser(' + i + ')">' + '</i>';
+                htmlData += '   <input type="hidden" id="receiveusername' + i + '" name="receiveusername" value="' + document.getElementById("alluser_name" + i).innerText + '">';
+                htmlData += '   <input type="hidden" id="receiveuserid' + i + '" name="receiveuserid" value="' + document.getElementById("alluser_id" + i).innerText + '">';
+                htmlData += '</span>';
+                $('#receiveuserlist').append(htmlData);
+            }
+        }
+    };
+
+    // 전체 유저 삭제
+    function AllDeleteReceiveUser() {
+        for(var i = 0; i < "<%=User.length%>"; i++)
+        {
+            // alluserlist 태그에서 모든 유저 보임
+            document.getElementById("alluser" + i).style.display = "inline";
+
+            // receiveuserlist 태그에서 모든 유저 삭제       
+            $('#receiveuserlist').empty();         
+        }
+    };
+
+
+    function check() {
+        var receive_userlist = document.getElementsByName("receiveuser");
+        var title = document.getElementById('title').value;
+        var content = theEditor.getData();
+
+        //alert(receive_userlist.length);
+
+        if(!receive_userlist.length)
+        {
+            alert("받는 사람이 지정되지 않았습니다.");
+            return false;
+        }
+
+
+        if(!title)
+        {
+            alert("제목이 입력되지 않았습니다.");
+            return false;
+        }
+
+        if(!content)
+        {
+            alert("내용이 입력되지 않았습니다.");
+            return false;
+        }
+
+        return true;
+    }
+
+
+
+    $(window).on("beforeunload", function () {
+        if(messagesend_check == 0)
+        {
+            var message = "이 페이지에서 나가시겠습니까?\n\n지금까지 작성된 글은 저장되지 않습니다.";
+            if (confirm(message)) return true;
+            else return false;
+        }
+    });
+
+
+
+</script>

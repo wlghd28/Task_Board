@@ -1,0 +1,199 @@
+<br>
+
+<section id="search-result-container" class="container">
+    <div class="d-flex justify-content-center mx-auto main-label" style="margin:auto">
+        <div class="row">
+            <div >
+                <h4>보낸 메시지 함</h4>
+            </div>
+        </div>
+    </div>
+
+    <div align-content="right" id="detail_searchoption" class="detail_searchoption">
+        <div style="display:block;float:right">
+            <form action="/message/searchsent" method="get" id="search" style="display:inline">
+                <select id="condition" name="condition">
+                    <option>제목</option>
+                    <option>받은사람</option>
+                    <option>내용</option>
+                </select>
+                <input type="text" id="simple_search_text" name="simple_search_text" placeholder="검색할 단어를 입력하세요.">
+                <input type="submit" value="검색">
+            </form>
+        </div>
+    </div>
+    <br>
+    <br>
+    <strong style="float:left;">* 최신 1000개의 메시지만 보여집니다.</strong>
+    <br>
+    <% var page_quantity = 30; %>
+    <% var pagenum = parseInt(page); %>
+    <% var str_receivername = ""; %>
+    <% var pageindex = 0; %>
+    <!-- PC 화면에서 보이는 테이블 -->
+    <div class="table_pc table-bordered table-responsive">
+        <table id="inquire-table" style="text-align:center;table-layout:fixed;" width="100%" height="100%">
+            <thead>
+                <tr class="table-warning">
+                    <th width="10%">To.</th>
+                    <th width="70%">제목</th>
+                    <th width="20%" >날짜</th>
+                </tr>         
+            </thead>
+            <tbody>
+                <% str_receivername = ""; %>
+                <% if(Message) { %>
+                    <% pageindex = 0; %>
+                    <% Message.forEach(function (message, index) { %>  
+                        <% if(index + 1 >= Message.length) { %>
+                            <% str_receivername += message.receiver_username; %>
+                            <% if (parseInt(pageindex / page_quantity + 1) == pagenum)  { %>
+                                <tr>
+                                    <td><a class="table_cell" style="max-width:100%"><%=str_receivername%></a></td>
+                                    <td style="text-align: left;">
+                                        <form action='/message/content' method=get id='<%=index %>'>
+                                            <a href=# onclick="document.getElementById('<%=index %>').submit();" class="table_cell" style="max-width:100%">
+                                                <%=message.message_title %>
+                                            </a>
+                                            <input type='hidden' name='message_num', value=<%=message.message_num %>>
+                                        </form>
+                                    </td>
+                                    <td><%=message["DATE_FORMAT(message_date, '%Y.%m.%d %H:%i')"] %></td>
+                                </tr>      
+                            <% } %>   
+                            <% pageindex++; %>      
+                        <% } else { %>
+                            <% if (Message[index].message_num == Message[index + 1].message_num) { %>
+                                <% str_receivername += message.receiver_username; %>
+                                <% str_receivername += ", " %>
+                            <% } else { %>
+                                <% str_receivername += message.receiver_username; %>
+                                <% if (parseInt(pageindex / page_quantity + 1) == pagenum)  { %>
+                                    <tr>
+                                        <td><a class="table_cell"  style="max-width:100%"><%=str_receivername%></a></td>
+                                        <td style="text-align: left;">
+                                            <form action='/message/content' method=get id='<%=index %>'>
+                                                <a href=# onclick="document.getElementById('<%=index %>').submit();" class="table_cell" style="max-width:100%">
+                                                    <%=message.message_title %>
+                                                </a>
+                                                <input type='hidden' name='message_num', value=<%=message.message_num %>>
+                                            </form>
+                                        </td>
+                                        <td><%=message["DATE_FORMAT(message_date, '%Y.%m.%d %H:%i')"] %></td>
+                                    </tr>      
+                                <% } %>    
+                                <% pageindex++; %>     
+                                <% str_receivername = ""; %>
+                            <% } %>
+                        <% } %> 
+                    <% }); %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+    <!-- 모바일 화면에서 보이는 테이블 -->
+    <div class="table_mobile table-bordered table-responsive">
+        <table id="inquire-table" style="text-align:center;table-layout:fixed;" width="100%" height="100%">
+            <thead>
+                <tr class="table-warning">                 
+                    <th width="100%" >제목</th>
+                </tr>       
+            </thead>
+            <tbody>
+                <% str_receivername = ""; %>    
+                <% if(Message) { %>
+                    <% pageindex = 0; %>
+                    <% Message.forEach(function (message, index) { %>
+                        <% if(index + 1 >= Message.length) { %>
+                            <% str_receivername += message.receiver_username; %>
+                            <% if (parseInt(pageindex / page_quantity + 1) == pagenum)  { %>
+                                <tr>                               
+                                    <td style="text-align: left;" width="100%">
+                                        <form action='/message/content' method=get id='<%=index %>'>
+                                            <a href=# onclick="document.getElementById('<%=index %>').submit();" class="table_cell" style="max-width:100%">
+                                                <%=message.message_title %>
+                                            </a>
+                                            <input type='hidden' name='message_num', value=<%=message.message_num %>>
+                                        </form>
+                                        <p style="font-size:15px">
+                                            <span class="table_cell"  style="max-width:50%">To. <%=str_receivername%></span>                                   
+                                            <span class="table_cell"  style="margin-left:20px"><%=message["DATE_FORMAT(message_date, '%Y.%m.%d %H:%i')"] %></span>                  
+                                        </p>
+                                    </td>
+                                </tr>      
+                            <% } %>    
+                            <% pageindex++; %>    
+                        <% } else { %>
+                            <% if (Message[index].message_num == Message[index + 1].message_num) { %>
+                                <% str_receivername += message.receiver_username; %>
+                                <% str_receivername += ", " %>
+                            <% } else { %>
+                                <% str_receivername += message.receiver_username; %>
+                                <% if (parseInt(pageindex / page_quantity + 1) == pagenum)  { %>
+                                    <tr>                               
+                                        <td style="text-align: left;" width="100%">
+                                            <form action='/message/content' method=get id='<%=index %>'>
+                                                <a href=# onclick="document.getElementById('<%=index %>').submit();" class="table_cell"  style="max-width:100%">
+                                                    <%=message.message_title %>
+                                                </a>
+                                                <input type='hidden' name='message_num', value=<%=message.message_num %>>
+                                            </form>
+                                            <p style="font-size:15px">
+                                                <span class="table_cell"  style="max-width:50%">To. <%=str_receivername%></span>                         
+                                                <span class="table_cell" style="margin-left:20px"><%=message["DATE_FORMAT(message_date, '%Y.%m.%d %H:%i')"] %></span>                  
+                                            </p>
+                                        </td>
+                                    </tr>      
+                                <% } %>    
+                                <% pageindex++; %>    
+                                <% str_receivername = ""; %>
+                            <% } %>
+                        <% } %>
+                    <% }); %>     
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</section>
+<br>        
+<!-- 페이징 기능 -->
+<nav class="text-center" aria-label="...">
+    <ul class="pagination justify-content-center">
+      <% var pageunit = 10; %>
+      <% var pagelength = parseInt((pageindex - 1)/page_quantity + 1); %>
+      <% var beforepage = pagenum - 1; %>
+      <% if(beforepage < 1) beforepage = 1; %>
+      <% var afterpage = pagenum + 1; %>  
+      <% if(afterpage > pagelength) afterpage = pagelength; %>
+      <li class="page-item">
+        <a class="page-link" href="/message/sentlist/1" aria-disabled="true"><..</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="/message/sentlist/<%=beforepage%>" aria-disabled="true"><</a>
+      </li>
+      <% for(var i = parseInt((pagenum - 1) / pageunit) * pageunit; i < parseInt((pagenum - 1) / pageunit) * pageunit + pageunit; i++) { %>
+        <% if(i < pagelength) { %>
+            <% if(pagenum == i + 1){ %>
+            <li class="page-item active" aria-current="page">
+                <a class="page-link" href="/message/sentlist/<%=i+1%>"><%=i+1%> <span class="sr-only">(current)</span></a>
+            </li>
+            <% }else{ %>
+            <li class="page-item" aria-current="page">
+                <a class="page-link" href="/message/sentlist/<%=i+1%>"><%=i+1%></a>
+            </li>
+            <% } %>
+        <% } %>
+      <% } %>
+      <li class="page-item">
+        <a class="page-link" href="/message/sentlist/<%=afterpage%>">></a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="/message/sentlist/<%=pagelength%>">..></a>
+      </li>
+    </ul>
+</nav>
+
+
+<script>
+    
+</script>

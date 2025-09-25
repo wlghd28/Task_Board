@@ -1,0 +1,85 @@
+<div class="container">  <!-- container class 가 페이지의 컨텐츠영역을 지정 -->
+    <div class="jumbotron" style="margin:auto">
+    <div class="bm-login-form" style='margin-left:auto; margin-right:auto; border:1px'>
+        <% if(Content) { %>
+            <div style="text-align:center;font-size:20px">
+                <%=Content["DATE_FORMAT(message_date, '%Y-%m-%d %H:%i')"] %>
+            </div>
+            <div>
+                <h7><%=Content.message_type %></h7>
+                <hr>
+                <p>
+                    From : <%=Content.message_username %><<span><%=Content.message_userid %></span>>
+                    <br>
+                    To : 
+                    <% Receiver.forEach(function (receiver, index) { %>  
+                        <span style="background-color:lightgray"><%=receiver.receiver_username%> <<span><%=receiver.receiver_userid%></span>></span>
+                    <% }); %>
+                </p>
+            </div>
+            <hr>
+            <h5>[ <%=Content.message_title %> ]</h5>
+            <hr>
+            <h7><strong>첨부파일</strong></h7><br><br>
+            <div>
+                <form id=download1 name=download method=get action="/message/content/download">
+                    <input type="hidden" id="filepath" name="filepath" value="<%=Content.message_filepath1 %>">
+                    <input type="hidden" id="filename" name="filename" value="<%=Content.message_orgfilename1 %>">
+                    <a href="#" onclick="return document.getElementById('download1').submit()"><%=Content.message_orgfilename1 %></a>
+                </form>
+                <form id=download2 name=download method=get action="/message/content/download">
+                    <input type="hidden" id="filepath" name="filepath" value="<%=Content.message_filepath2 %>">
+                    <input type="hidden" id="filename" name="filename" value="<%=Content.message_orgfilename2 %>">
+                    <a href="#" onclick="return document.getElementById('download2').submit()"><%=Content.message_orgfilename2 %></a>
+                </form>
+                <form id=download3 name=download method=get action="/message/content/download">
+                    <input type="hidden" id="filepath" name="filepath" value="<%=Content.message_filepath3 %>">
+                    <input type="hidden" id="filename" name="filename" value="<%=Content.message_orgfilename3 %>">
+                    <a href="#" onclick="return document.getElementById('download3').submit()"><%=Content.message_orgfilename3 %></a>
+                </form>
+                <form id=download4 name=download method=get action="/message/content/download">
+                    <input type="hidden" id="filepath" name="filepath" value="<%=Content.message_filepath4 %>">
+                    <input type="hidden" id="filename" name="filename" value="<%=Content.message_orgfilename4 %>">
+                    <a href="#" onclick="return document.getElementById('download4').submit()"><%=Content.message_orgfilename4 %></a>
+                </form>
+                <form id=download5 name=download method=get action="/message/content/download">
+                    <input type="hidden" id="filepath" name="filepath" value="<%=Content.message_filepath5 %>">
+                    <input type="hidden" id="filename" name="filename" value="<%=Content.message_orgfilename5 %>">
+                    <a href="#" onclick="return document.getElementById('download5').submit()"><%=Content.message_orgfilename5 %></a>
+                </form>
+            </div>
+            <hr>
+            <div id="content" class="form-group" style="min-height:300px;"></div>
+            <hr>
+        <% } %>
+    </div>
+    </div>
+</div><!-- /.container -->
+
+<script>
+    // 페이지 로드할 때 실행
+    window.onload = function(){ 
+        var tmpimg = new Image();
+        var figuretag = document.getElementsByClassName("image");
+        var imgtag = $(".image").find('img');
+        if(imgtag)
+        {
+            for(var i = 0; i < imgtag.length; i++)
+            {
+                imgtag[i].style.width = figuretag[i].style.width;
+            }
+        }
+    }
+
+    var content = document.getElementById("content");
+    var tmpStr = "<%=Content.message_content %>"
+    tmpStr = tmpStr.replaceAll("&lt;", "<");
+    tmpStr = tmpStr.replaceAll("&gt;", ">");
+    tmpStr = tmpStr.replaceAll("&amp;lt;", "<");
+    tmpStr = tmpStr.replaceAll("&amp;gt;", ">");
+    tmpStr = tmpStr.replaceAll("&amp;nbsp;", " ");
+    tmpStr = tmpStr.replaceAll("&amp;amp;", "&");
+    tmpStr = tmpStr.replaceAll("&#34;", "");
+    content.innerHTML = tmpStr;
+
+</script>
